@@ -1,0 +1,23 @@
+## Interface: 20505
+## Title: AddressBook
+## Notes: Location and NPC address book with TomTom waypoint integration.
+## Author: Breakbone - Dreamscythe
+## Version: 1.0.0
+## X-License: All Rights Reserved
+## OptionalDeps: TomTom
+## SavedVariables: AddressBookDB
+## SavedVariablesPerCharacter: AddressBookCharDB
+
+Libs\LibStub\LibStub.lua
+Libs\CallbackHandler-1.0\CallbackHandler-1.0.lua
+Libs\LibDataBroker-1.1\LibDataBroker-1.1.lua
+Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
+
+MapResolver.lua
+Data.lua
+UserData.lua
+TomTomIntegration.lua
+Core.lua
+MinimapButton.lua
+UIControls.lua
+UI.lua
