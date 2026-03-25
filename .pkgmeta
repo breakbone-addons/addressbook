@@ -6,7 +6,6 @@ ignore:
   - .github
   - .gitignore
   - .pkgmeta
-  - tools
   - CLAUDE.md
 
 externals:
