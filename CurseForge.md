@@ -1,40 +1,41 @@
-# AddressBook
+## AddressBook helps you find NPCs and locations across Azeroth and Outland with one-click TomTom waypoint navigation. Built for TBC Anniversary.
 
-An address book for World of Warcraft that helps you find NPCs and locations with one-click TomTom waypoint navigation.
+## Features
 
-![AddressBook](screenshots/main.png)
+### Browse & Navigate
 
-## What It Does
+Find any NPC by category, continent, and zone. Over 4,300 pre-populated locations including quest givers, class trainers, profession trainers, flight masters, innkeepers, repair vendors, banks, auction houses, battlemasters, and stable masters. Select an entry and set a TomTom waypoint with one click.
 
-Browse over 1,600 pre-populated NPC locations across Azeroth and Outland. Find trainers, flight masters, innkeepers, vendors, banks, and more — then set a TomTom waypoint with a single click.
+<img src="https://raw.githubusercontent.com/breakbone-addons/addressbook/main/screenshots/main.png" alt="AddressBook Main Window" width="500"/>
 
-## Key Features
+### TomTom Integration
 
-**Browse by Category**
-- Class Trainers, Profession Trainers, Weapon Masters
-- Flight Masters
-- Innkeepers, Repair Vendors, Banks, Auction Houses
-- Battlemasters, Stable Masters
+Double-click any entry to create a TomTom waypoint with the crazy arrow pointing you directly to your destination. Works seamlessly — if TomTom isn't installed, coordinates are printed to chat instead.
 
-**Filter by Location**
-- Continent and zone dropdowns narrow the list to where you are (or where you want to go)
-- "Auto" mode detects your current zone and filters automatically
+### Continent & Zone Filtering
 
-**TomTom Waypoints**
-- Double-click any entry to set a TomTom waypoint with navigation arrow
-- Works without TomTom too — coordinates are displayed in chat as a fallback
+Narrow results with continent and zone dropdowns that work alongside the category tree. "Auto" mode detects your current zone and filters automatically — the list always shows what's relevant to where you are.
 
-**Save Your Own Locations**
-- Stand anywhere and save it to your personal address book
-- Use `/ab add MySpot` or the "Save Here" button
-- Update existing entries with `/ab record`
+### Search Everything
 
-**Search Everything**
-- Search across all categories by NPC name, zone, or description
+Search across all categories by NPC name, zone, or description. Results update as you type.
 
-## Slash Commands
+### Custom Locations
 
-- `/ab` — Open the address book
+Save your own locations to a personal address book. Stand anywhere and save with `/ab add` or the "Save Here" button. Update existing entries with `/ab record` to correct coordinates as you explore.
+
+### Faction-Aware
+
+Toggle faction filtering to show only NPCs friendly to your character's faction.
+
+## Data Sources
+
+Location data is extracted from the [Questie](https://github.com/Questie/Questie) addon's TBC NPC database. Coordinates are verified against the game client at runtime.
+
+## Usage
+
+- **Minimap button**: Left-click to open, right-click to quick-save your current location
+- `/ab` — Toggle the address book
 - `/ab search <query>` — Search from chat
 - `/ab add [name]` — Save current location
 - `/ab record <name>` — Update or create entry at your position
@@ -43,6 +44,10 @@ Browse over 1,600 pre-populated NPC locations across Azeroth and Outland. Find t
 
 ## Installation
 
-Drop the AddressBook folder into your `Interface/AddOns/` directory and `/reload`.
+Extract the `AddressBook` folder into your WoW AddOns directory:
+
+```
+World of Warcraft/_anniversary_/Interface/AddOns/AddressBook/
+```
 
 TomTom is optional but recommended for waypoint arrow navigation.
