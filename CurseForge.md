@@ -2,6 +2,8 @@
 
 An address book for World of Warcraft that helps you find NPCs and locations with one-click TomTom waypoint navigation.
 
+![AddressBook](screenshots/main.png)
+
 ## What It Does
 
 Browse over 1,600 pre-populated NPC locations across Azeroth and Outland. Find trainers, flight masters, innkeepers, vendors, banks, and more — then set a TomTom waypoint with a single click.

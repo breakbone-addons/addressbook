@@ -2,6 +2,8 @@
 
 A location and NPC address book for World of Warcraft (BCC Anniversary Edition) with TomTom waypoint integration.
 
+![AddressBook](screenshots/main.png)
+
 ## Features
 
 - **1,600+ Pre-Populated Locations** — Class trainers, profession trainers, flight masters, innkeepers, repair vendors, banks, auction houses, battlemasters, stable masters, and more across Eastern Kingdoms, Kalimdor, and Outland.

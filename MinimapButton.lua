@@ -9,7 +9,7 @@ function AddressBook:InitMinimapButton()
     local dataObj = LDB:NewDataObject("AddressBook", {
         type = "launcher",
         text = "AddressBook",
-        icon = "Interface\\Icons\\INV_Misc_Map_01",
+        icon = "Interface\\AddOns\\AddressBook\\minimap-icon",
         OnClick = function(_, button)
             if button == "LeftButton" then
                 AddressBook:ToggleUI()
