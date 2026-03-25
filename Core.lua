@@ -123,6 +123,60 @@ function AddressBook:GetCategories()
     return result
 end
 
+-- Favorites
+function AddressBook:GetFavoriteKey(entry)
+    return (entry.name or "") .. "|" .. (entry.zone or "")
+end
+
+function AddressBook:IsFavorite(entry)
+    if not AddressBookDB or not AddressBookDB.favorites then return false end
+    return AddressBookDB.favorites[self:GetFavoriteKey(entry)] ~= nil
+end
+
+function AddressBook:ToggleFavorite(entry)
+    if not AddressBookDB then return end
+    if not AddressBookDB.favorites then AddressBookDB.favorites = {} end
+
+    local key = self:GetFavoriteKey(entry)
+    if AddressBookDB.favorites[key] then
+        AddressBookDB.favorites[key] = nil
+        self:Print("Removed from favorites: " .. entry.name)
+    else
+        -- Store a copy of the entry as the favorite
+        AddressBookDB.favorites[key] = {
+            name = entry.name,
+            zone = entry.zone,
+            x = entry.x,
+            y = entry.y,
+            faction = entry.faction,
+            note = entry.note,
+            mapID = entry.mapID,
+        }
+        self:Print("Added to favorites: " .. entry.name)
+    end
+
+    if self.RefreshUI then
+        self:RefreshUI()
+    end
+end
+
+function AddressBook:GetFavorites()
+    local results = {}
+    if not AddressBookDB or not AddressBookDB.favorites then return results end
+    for key, entry in pairs(AddressBookDB.favorites) do
+        results[#results + 1] = {
+            entry = entry,
+            category = "Favorites",
+            subcategory = "Favorites",
+            index = key,
+            isCustom = false,
+            isFavorite = true,
+        }
+    end
+    table.sort(results, function(a, b) return a.entry.name < b.entry.name end)
+    return results
+end
+
 function AddressBook:ToggleUI()
     if self.mainFrame then
         if self.mainFrame:IsShown() then
@@ -158,7 +212,11 @@ local function SlashHandler(msg)
             end
         end
     elseif cmd == "add" then
-        AddressBook:SaveHere(rest or "My Location", "Custom", nil)
+        if AddressBook.ShowEditDialog then
+            AddressBook:ShowEditDialog(nil)
+        else
+            AddressBook:SaveHere(rest or "My Location", "Custom", nil)
+        end
     elseif cmd == "record" then
         -- Record current position and update an existing entry or create new
         if rest then
@@ -235,6 +293,9 @@ eventFrame:SetScript("OnEvent", function(self, event)
         end
         if not AddressBookDB.settings then
             AddressBookDB.settings = { showFactionOnly = true }
+        end
+        if not AddressBookDB.favorites then
+            AddressBookDB.favorites = {} -- keyed by "name|zone" for quick lookup
         end
 
         if not AddressBookCharDB then

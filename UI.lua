@@ -2,6 +2,7 @@ AddressBook = AddressBook or {}
 
 local UI = AddressBook.UI
 
+-- Helper: get editBox from a StaticPopup dialog (handles BCC API differences)
 -- State
 local expandedCategories = {}
 local selectedCategory = nil
@@ -206,13 +207,6 @@ function AddressBook:CreateMainFrame()
     frame._searchBox = searchBox
     frame._continentDropdown = continentDropdown
 
-    -- Save Here button
-    local saveHereBtn = AddressBook:CreateButton(frame, "Save Here", 80, 22)
-    saveHereBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -UI.PADDING - 8, filterY2)
-    saveHereBtn:SetScript("OnClick", function()
-        StaticPopup_Show("ADDRESSBOOK_SAVE_HERE")
-    end)
-
     -------------------------------------------------------------------
     -- CATEGORY PANEL (left side)
     -------------------------------------------------------------------
@@ -307,7 +301,7 @@ function AddressBook:CreateMainFrame()
     local addBtn = AddressBook:CreateButton(frame, "Add Entry", 80, 24)
     addBtn:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", UI.PADDING + 8, UI.PADDING + 8)
     addBtn:SetScript("OnClick", function()
-        StaticPopup_Show("ADDRESSBOOK_ADD_ENTRY")
+        AddressBook:ShowEditDialog(nil)
     end)
 
     -- Faction filter checkbox
@@ -333,69 +327,6 @@ function AddressBook:CreateMainFrame()
     -------------------------------------------------------------------
     -- STATIC POPUPS
     -------------------------------------------------------------------
-    StaticPopupDialogs["ADDRESSBOOK_SAVE_HERE"] = {
-        text = "Save current location as:",
-        button1 = "Save",
-        button2 = "Cancel",
-        hasEditBox = true,
-        editBoxWidth = 200,
-        OnAccept = function(self)
-            local name = self.editBox:GetText()
-            if name and name ~= "" then
-                AddressBook:SaveHere(name, "Custom", nil)
-            end
-        end,
-        OnShow = function(self)
-            self.editBox:SetText("My Location")
-            self.editBox:HighlightText()
-        end,
-        EditBoxOnEnterPressed = function(self)
-            local parent = self:GetParent()
-            local name = parent.editBox:GetText()
-            if name and name ~= "" then
-                AddressBook:SaveHere(name, "Custom", nil)
-            end
-            parent:Hide()
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3,
-    }
-
-    StaticPopupDialogs["ADDRESSBOOK_ADD_ENTRY"] = {
-        text = "Enter location name:",
-        button1 = "Add",
-        button2 = "Cancel",
-        hasEditBox = true,
-        editBoxWidth = 200,
-        OnAccept = function(self)
-            local name = self.editBox:GetText()
-            if name and name ~= "" then
-                if AddressBook.ShowEditDialog then
-                    AddressBook:ShowEditDialog(nil, name)
-                else
-                    AddressBook:SaveHere(name, "Custom", nil)
-                end
-            end
-        end,
-        OnShow = function(self)
-            self.editBox:SetText("")
-        end,
-        EditBoxOnEnterPressed = function(self)
-            local parent = self:GetParent()
-            local name = parent.editBox:GetText()
-            if name and name ~= "" then
-                AddressBook:SaveHere(name, "Custom", nil)
-            end
-            parent:Hide()
-        end,
-        timeout = 0,
-        whileDead = true,
-        hideOnEscape = true,
-        preferredIndex = 3,
-    }
-
     StaticPopupDialogs["ADDRESSBOOK_CONFIRM_DELETE"] = {
         text = "Delete '%s' from your address book?",
         button1 = "Delete",
@@ -419,14 +350,19 @@ function AddressBook:CreateMainFrame()
         selectedCategory = AddressBookCharDB.lastCategory
         selectedSubcategory = AddressBookCharDB.lastSubcategory
     else
-        -- Expand first category
+        -- Expand first non-flat category
         local cats = self:GetCategories()
-        if cats[1] then
-            expandedCategories[cats[1].name] = true
-            selectedCategory = cats[1].name
-            if cats[1].subcategories[1] then
-                selectedSubcategory = cats[1].subcategories[1]
+        -- Check if Favorites exist and skip them for auto-expand
+        local favEntries = AddressBook:GetFavorites()
+        local startIdx = (#favEntries > 0) and 2 or 1
+        if cats[startIdx] then
+            expandedCategories[cats[startIdx].name] = true
+            selectedCategory = cats[startIdx].name
+            if cats[startIdx].subcategories[1] then
+                selectedSubcategory = cats[startIdx].subcategories[1]
             end
+        elseif #favEntries > 0 then
+            selectedCategory = "Favorites"
         end
     end
 
@@ -463,6 +399,13 @@ RefreshCategoryList = function()
 
     -- Build ordered list, then append any extras
     local orderedList = {}
+
+    -- Favorites always first (if any exist)
+    local favEntries = AddressBook:GetFavorites()
+    if #favEntries > 0 then
+        orderedList[#orderedList + 1] = { name = "Favorites", subcategories = {} }
+    end
+
     for _, catName in ipairs(orderedCats) do
         if catLookup[catName] then
             orderedList[#orderedList + 1] = catLookup[catName]
@@ -476,22 +419,35 @@ RefreshCategoryList = function()
     end
 
     for _, cat in ipairs(orderedList) do
+        local isFlatCategory = (cat.name == "Favorites")
         local isExpanded = expandedCategories[cat.name]
-        local catBtn = AddressBook:CreateCategoryButton(catChild, cat.name, 1, isExpanded)
+        local catBtn = AddressBook:CreateCategoryButton(catChild, cat.name, 1, isExpanded, isFlatCategory)
         catBtn:SetPoint("TOPLEFT", catChild, "TOPLEFT", 0, -yOffset)
         catBtn:SetPoint("RIGHT", catChild, "RIGHT", 0, 0)
 
+        -- Highlight flat categories when selected
+        if isFlatCategory and selectedCategory == cat.name then
+            catBtn._selectedBg:Show()
+        end
+
         catBtn._categoryName = cat.name
+        catBtn._isFlat = isFlatCategory
         catBtn:SetScript("OnClick", function(self)
-            expandedCategories[self._categoryName] = not expandedCategories[self._categoryName]
-            selectedCategory = self._categoryName
-            -- Select first subcategory when expanding
-            if expandedCategories[self._categoryName] then
-                local subOrder = AddressBook.SubcategoryOrder and AddressBook.SubcategoryOrder[self._categoryName]
-                if subOrder and subOrder[1] then
-                    selectedSubcategory = subOrder[1]
-                elseif cat.subcategories[1] then
-                    selectedSubcategory = cat.subcategories[1]
+            if self._isFlat then
+                -- Flat category: select directly, no expand/collapse
+                selectedCategory = self._categoryName
+                selectedSubcategory = nil
+            else
+                expandedCategories[self._categoryName] = not expandedCategories[self._categoryName]
+                selectedCategory = self._categoryName
+                -- Select first subcategory when expanding
+                if expandedCategories[self._categoryName] then
+                    local subOrder = AddressBook.SubcategoryOrder and AddressBook.SubcategoryOrder[self._categoryName]
+                    if subOrder and subOrder[1] then
+                        selectedSubcategory = subOrder[1]
+                    elseif cat.subcategories[1] then
+                        selectedSubcategory = cat.subcategories[1]
+                    end
                 end
             end
             -- Persist selection
@@ -506,7 +462,7 @@ RefreshCategoryList = function()
         categoryButtons[#categoryButtons + 1] = catBtn
         yOffset = yOffset + 18
 
-        if isExpanded then
+        if isExpanded and not isFlatCategory then
             -- Use ordered subcategories if available
             local subOrder = AddressBook.SubcategoryOrder and AddressBook.SubcategoryOrder[cat.name]
             local subs = subOrder or cat.subcategories
@@ -563,6 +519,8 @@ RefreshEntryList = function()
     local entries
     if searchText ~= "" then
         entries = AddressBook:Search(searchText)
+    elseif selectedCategory == "Favorites" then
+        entries = AddressBook:GetFavorites()
     elseif selectedCategory and selectedSubcategory then
         entries = AddressBook:GetEntries(selectedCategory, selectedSubcategory)
     else
@@ -619,7 +577,10 @@ RefreshEntryList = function()
         row._zoneText:SetText(e.zone or "")
         row._noteText:SetText(e.note or "")
 
-        if data.isCustom then
+        if AddressBook:IsFavorite(e) then
+            row._nameText:SetTextColor(0.2, 0.9, 0.2)
+            row._customIcon:SetText("")
+        elseif data.isCustom then
             row._nameText:SetTextColor(UI.COLOR_CUSTOM.r, UI.COLOR_CUSTOM.g, UI.COLOR_CUSTOM.b)
             row._customIcon:SetText("*")
         else
@@ -722,58 +683,192 @@ end
 -------------------------------------------------------------------
 -- EDIT DIALOG
 -------------------------------------------------------------------
-function AddressBook:ShowEditDialog(data, defaultName)
-    -- Simple edit using StaticPopup for v1
-    if data then
-        -- Editing existing custom entry
-        local dialog = StaticPopup_Show("ADDRESSBOOK_EDIT_ENTRY")
-        if dialog then
-            dialog.editBox:SetText(data.entry.name or "")
-            dialog.editBox:HighlightText()
-            dialog.data = { original = data }
-        end
-    else
-        -- Adding new — just save here with the given name
-        if defaultName then
-            AddressBook:SaveHere(defaultName, "Custom", nil)
-        end
+-------------------------------------------------------------------
+-- EDIT / ADD ENTRY DIALOG
+-------------------------------------------------------------------
+local editDialog
+
+local function CreateEditDialog()
+    if editDialog then return editDialog end
+
+    local dlg = CreateFrame("Frame", "AddressBookEditDialog", UIParent, "BackdropTemplate")
+    dlg:SetSize(320, 260)
+    dlg:SetPoint("CENTER")
+    dlg:SetFrameStrata("DIALOG")
+    dlg:SetBackdrop({
+        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
+        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
+        tile = true, tileSize = 32, edgeSize = 32,
+        insets = { left = 11, right = 12, top = 12, bottom = 11 },
+    })
+    dlg:SetMovable(true)
+    dlg:EnableMouse(true)
+    dlg:RegisterForDrag("LeftButton")
+    dlg:SetScript("OnDragStart", dlg.StartMoving)
+    dlg:SetScript("OnDragStop", dlg.StopMovingOrSizing)
+    dlg:Hide()
+    tinsert(UISpecialFrames, "AddressBookEditDialog")
+
+    -- Title
+    local title = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    title:SetPoint("TOP", 0, -16)
+    dlg._title = title
+
+    local yPos = -38
+    local labelWidth = 55
+    local fieldHeight = 20
+
+    -- Helper: create a labeled input
+    local function MakeField(parent, labelText, y, editWidth)
+        local lbl = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        lbl:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, y)
+        lbl:SetWidth(labelWidth)
+        lbl:SetJustifyH("RIGHT")
+        lbl:SetText(labelText)
+
+        local eb = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+        eb:SetPoint("LEFT", lbl, "RIGHT", 8, 0)
+        eb:SetSize(editWidth or 200, fieldHeight)
+        eb:SetAutoFocus(false)
+        return eb
     end
+
+    -- Name
+    dlg._nameBox = MakeField(dlg, "Name:", yPos)
+    dlg._nameBox:SetMaxLetters(30)
+    yPos = yPos - 28
+
+    -- Coordinates row (X, Y + Current Location button)
+    local coordLabel = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    coordLabel:SetPoint("TOPLEFT", dlg, "TOPLEFT", 20, yPos)
+    coordLabel:SetWidth(labelWidth)
+    coordLabel:SetJustifyH("RIGHT")
+    coordLabel:SetText("Coords:")
+
+    local xBox = CreateFrame("EditBox", nil, dlg, "InputBoxTemplate")
+    xBox:SetPoint("LEFT", coordLabel, "RIGHT", 8, 0)
+    xBox:SetSize(50, fieldHeight)
+    xBox:SetAutoFocus(false)
+    xBox:SetNumeric(false)
+    dlg._xBox = xBox
+
+    local commaLabel = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    commaLabel:SetPoint("LEFT", xBox, "RIGHT", 2, 0)
+    commaLabel:SetText(",")
+
+    local yBox = CreateFrame("EditBox", nil, dlg, "InputBoxTemplate")
+    yBox:SetPoint("LEFT", commaLabel, "RIGHT", 2, 0)
+    yBox:SetSize(50, fieldHeight)
+    yBox:SetAutoFocus(false)
+    yBox:SetNumeric(false)
+    dlg._yBox = yBox
+
+    local locBtn = CreateFrame("Button", nil, dlg, "UIPanelButtonTemplate")
+    locBtn:SetSize(90, 20)
+    locBtn:SetPoint("LEFT", yBox, "RIGHT", 8, 0)
+    locBtn:SetText("Current Loc")
+    locBtn:SetScript("OnClick", function()
+        local mapID = C_Map.GetBestMapForUnit("player")
+        if mapID then
+            local pos = C_Map.GetPlayerMapPosition(mapID, "player")
+            if pos then
+                local px, py = pos:GetXY()
+                xBox:SetText(format("%.1f", px * 100))
+                yBox:SetText(format("%.1f", py * 100))
+                -- Also update zone
+                local info = C_Map.GetMapInfo(mapID)
+                if info and info.name then
+                    dlg._zoneBox:SetText(info.name)
+                end
+            end
+        end
+    end)
+    yPos = yPos - 28
+
+    -- Zone
+    dlg._zoneBox = MakeField(dlg, "Zone:", yPos)
+    yPos = yPos - 28
+
+    -- Note
+    dlg._noteBox = MakeField(dlg, "Note:", yPos)
+    dlg._noteBox:SetMaxLetters(60)
+    yPos = yPos - 36
+
+    -- Buttons
+    local saveBtn = CreateFrame("Button", nil, dlg, "UIPanelButtonTemplate")
+    saveBtn:SetSize(80, 22)
+    saveBtn:SetPoint("BOTTOMRIGHT", dlg, "BOTTOM", -4, 14)
+    saveBtn:SetText("Save")
+    dlg._saveBtn = saveBtn
+
+    local cancelBtn = CreateFrame("Button", nil, dlg, "UIPanelButtonTemplate")
+    cancelBtn:SetSize(80, 22)
+    cancelBtn:SetPoint("BOTTOMLEFT", dlg, "BOTTOM", 4, 14)
+    cancelBtn:SetText("Cancel")
+    cancelBtn:SetScript("OnClick", function() dlg:Hide() end)
+
+    dlg:SetScript("OnKeyDown", function(self, key)
+        if key == "ESCAPE" then
+            self:Hide()
+            self:SetPropagateKeyboardInput(false)
+        else
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
+
+    editDialog = dlg
+    return dlg
 end
 
-StaticPopupDialogs["ADDRESSBOOK_EDIT_ENTRY"] = {
-    text = "Edit location name:",
-    button1 = "Save",
-    button2 = "Cancel",
-    hasEditBox = true,
-    editBoxWidth = 200,
-    OnAccept = function(self)
-        local name = self.editBox:GetText()
-        local data = self.data and self.data.original
-        if name and name ~= "" and data then
+function AddressBook:ShowEditDialog(data)
+    local dlg = CreateEditDialog()
+
+    if data then
+        -- Editing existing
+        dlg._title:SetText("Edit Location")
+        dlg._nameBox:SetText(data.entry.name or "")
+        dlg._xBox:SetText(data.entry.x and format("%.1f", data.entry.x) or "")
+        dlg._yBox:SetText(data.entry.y and format("%.1f", data.entry.y) or "")
+        dlg._zoneBox:SetText(data.entry.zone or "")
+        dlg._noteBox:SetText(data.entry.note or "")
+
+        dlg._saveBtn:SetScript("OnClick", function()
+            local name = strtrim(dlg._nameBox:GetText() or "")
+            if name == "" then return end
             local updated = {}
             for k, v in pairs(data.entry) do
                 updated[k] = v
             end
             updated.name = name
+            updated.x = tonumber(dlg._xBox:GetText()) or updated.x
+            updated.y = tonumber(dlg._yBox:GetText()) or updated.y
+            updated.zone = strtrim(dlg._zoneBox:GetText() or "") or updated.zone
+            local noteText = strtrim(dlg._noteBox:GetText() or "")
+            updated.note = noteText ~= "" and noteText or nil
             AddressBook:EditCustomEntry(data.category, data.subcategory, data.index, updated)
-        end
-    end,
-    EditBoxOnEnterPressed = function(self)
-        local parent = self:GetParent()
-        local name = parent.editBox:GetText()
-        local data = parent.data and parent.data.original
-        if name and name ~= "" and data then
-            local updated = {}
-            for k, v in pairs(data.entry) do
-                updated[k] = v
-            end
-            updated.name = name
-            AddressBook:EditCustomEntry(data.category, data.subcategory, data.index, updated)
-        end
-        parent:Hide()
-    end,
-    timeout = 0,
-    whileDead = true,
-    hideOnEscape = true,
-    preferredIndex = 3,
-}
+            dlg:Hide()
+        end)
+    else
+        -- Adding new
+        dlg._title:SetText("Add Entry")
+        dlg._nameBox:SetText("")
+        dlg._xBox:SetText("")
+        dlg._yBox:SetText("")
+        dlg._zoneBox:SetText("")
+        dlg._noteBox:SetText("")
+
+        dlg._saveBtn:SetScript("OnClick", function()
+            local name = strtrim(dlg._nameBox:GetText() or "")
+            if name == "" then return end
+            local zone = strtrim(dlg._zoneBox:GetText() or "")
+            local x = tonumber(dlg._xBox:GetText()) or 0
+            local y = tonumber(dlg._yBox:GetText()) or 0
+            local noteText = strtrim(dlg._noteBox:GetText() or "")
+            AddressBook:SaveManualEntry(name, zone, x, y, noteText)
+            dlg:Hide()
+        end)
+    end
+
+    dlg:Show()
+    dlg._nameBox:SetFocus()
+end

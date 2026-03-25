@@ -4126,6 +4126,7 @@ AddressBook.LocationDB = {
             { name = "Koma", zone = "Orgrimmar", x = 50.0, y = 68.58, faction = "Horde", note = "Banker" },
             { name = "Soran", zone = "Orgrimmar", x = 49.08, y = 69.59, faction = "Horde", note = "Banker" },
             { name = "Berudan Keysworn", zone = "Shattrath City", x = 58.69, y = 61.45, note = "Banker" },
+            { name = "L'lura Goldspun", zone = "Shattrath City", x = 59.97, y = 60.46, note = "Banker" },
             { name = "Gromden", zone = "Shattrath City", x = 48.13, y = 29.32, note = "Banker" },
             { name = "Mendorn", zone = "Shattrath City", x = 49.41, y = 28.35, note = "Banker" },
             { name = "Ceera", zone = "Silvermoon City", x = 67.78, y = 77.9, faction = "Horde", note = "Banker" },

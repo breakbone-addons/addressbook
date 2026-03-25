@@ -134,7 +134,7 @@ function AddressBook:CreateButton(parent, text, width, height)
 end
 
 -- Create a category tree button
-function AddressBook:CreateCategoryButton(parent, text, level, isExpanded)
+function AddressBook:CreateCategoryButton(parent, text, level, isExpanded, noArrow)
     local btn = CreateFrame("Button", nil, parent)
     btn:SetHeight(18)
 
@@ -152,7 +152,11 @@ function AddressBook:CreateCategoryButton(parent, text, level, isExpanded)
 
     if level == 1 then
         label:SetTextColor(UI.COLOR_CATEGORY.r, UI.COLOR_CATEGORY.g, UI.COLOR_CATEGORY.b)
-        arrow:SetText(isExpanded and "v " or "> ")
+        if noArrow then
+            arrow:SetText("  ")
+        else
+            arrow:SetText(isExpanded and "v " or "> ")
+        end
         arrow:SetTextColor(UI.COLOR_CATEGORY.r, UI.COLOR_CATEGORY.g, UI.COLOR_CATEGORY.b)
     else
         label:SetTextColor(UI.COLOR_SUBCATEGORY.r, UI.COLOR_SUBCATEGORY.g, UI.COLOR_SUBCATEGORY.b)
@@ -199,6 +203,16 @@ function AddressBook:ShowEntryContextMenu(row)
         info.notCheckable = true
         info.func = function()
             AddressBook:SetWaypoint(data.entry)
+        end
+        UIDropDownMenu_AddButton(info, level)
+
+        -- Favorite toggle
+        info = UIDropDownMenu_CreateInfo()
+        local isFav = AddressBook:IsFavorite(data.entry)
+        info.text = isFav and "Remove Favorite" or "Add Favorite"
+        info.notCheckable = true
+        info.func = function()
+            AddressBook:ToggleFavorite(data.entry)
         end
         UIDropDownMenu_AddButton(info, level)
 

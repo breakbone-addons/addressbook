@@ -12,6 +12,10 @@ Find any NPC by category, continent, and zone. Over 4,300 pre-populated location
 
 Double-click any entry to create a TomTom waypoint with the crazy arrow pointing you directly to your destination. Works seamlessly — if TomTom isn't installed, coordinates are printed to chat instead.
 
+### Favorites
+
+Right-click any entry and select "Add Favorite" to bookmark it. Favorites appear in green and are collected in a dedicated Favorites category at the top of the tree for quick access. Persists across sessions.
+
 ### Continent & Zone Filtering
 
 Narrow results with continent and zone dropdowns that work alongside the category tree. "Auto" mode detects your current zone and filters automatically — the list always shows what's relevant to where you are.
@@ -22,7 +26,7 @@ Search across all categories by NPC name, zone, or description. Results update a
 
 ### Custom Locations
 
-Save your own locations to a personal address book. Stand anywhere and save with `/ab add` or the "Save Here" button. Update existing entries with `/ab record` to correct coordinates as you explore.
+Click "Add Entry" to save your own locations. The entry dialog lets you set a name, coordinates, zone, and notes. Use the "Current Location" button to auto-fill your position, or type coordinates manually for locations you're not standing at.
 
 ### Faction-Aware
 
@@ -34,10 +38,10 @@ Location data is extracted from the [Questie](https://github.com/Questie/Questie
 
 ## Usage
 
-- **Minimap button**: Left-click to open, right-click to quick-save your current location
+- **Minimap button**: Left-click to open
 - `/ab` — Toggle the address book
 - `/ab search <query>` — Search from chat
-- `/ab add [name]` — Save current location
+- `/ab add` — Open the Add Entry dialog
 - `/ab record <name>` — Update or create entry at your position
 - `/ab waypoint <name>` — Set waypoint from chat
 - `/ab help` — Show all commands

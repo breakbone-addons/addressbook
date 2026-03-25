@@ -1,5 +1,14 @@
 # AddressBook Changelog
 
+## 1.1.0
+- Added favorites: right-click any entry to mark as favorite, shown in green with a dedicated Favorites category
+- Added full Add Entry dialog with name, coordinates, zone, and note fields
+- Added "Current Location" button to auto-fill position in the Add Entry dialog
+- Added note field for custom locations
+- Expanded location database to 4,300+ entries
+- Fixed TomTom waypoint integration for BCC Anniversary Edition mapIDs
+- Removed redundant Save Here button (Add Entry now handles all entry creation)
+
 ## 1.0.0
 - Initial release
 - Browse 1,600+ NPC locations: trainers, flight masters, innkeepers, vendors, banks, auction houses, battlemasters, and more

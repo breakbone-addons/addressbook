@@ -39,6 +39,47 @@ function AddressBook:SaveHere(name, category, note)
     self:Print(format("Saved '%s' at %s (%.1f, %.1f)", entry.name, zoneName, x, y))
 end
 
+-- Save a manually entered location
+function AddressBook:SaveManualEntry(name, zone, x, y, note)
+    if not name or name == "" then
+        self:Print("Name is required.")
+        return
+    end
+
+    -- Try to resolve mapID from zone name
+    local mapID
+    if zone and zone ~= "" then
+        if self.zoneToMapID then
+            mapID = self.zoneToMapID[zone:lower()]
+        end
+        if not mapID then
+            -- Try C_Map lookup
+            for id = 1, 2500 do
+                local info = C_Map.GetMapInfo(id)
+                if info and info.name and info.name:lower() == zone:lower() then
+                    mapID = id
+                    break
+                end
+            end
+        end
+    end
+
+    x = tonumber(x) or 0
+    y = tonumber(y) or 0
+
+    local entry = {
+        name = name,
+        zone = zone or "Unknown",
+        mapID = mapID,
+        x = x,
+        y = y,
+        note = note ~= "" and note or nil,
+    }
+
+    self:AddCustomEntry("Custom", "My Locations", entry)
+    self:Print(format("Added '%s' at %s (%.1f, %.1f)", name, entry.zone, x, y))
+end
+
 -- Add a custom entry to the saved variables
 function AddressBook:AddCustomEntry(category, subcategory, entry)
     if not AddressBookDB then AddressBookDB = {} end

@@ -6,7 +6,7 @@
 
 <p align="center">
   A World of Warcraft TBC Anniversary addon that helps you find NPCs and locations with one-click TomTom waypoint navigation.<br/>
-  4,300+ pre-populated locations with continent/zone filtering, search, and custom entries.
+  4,300+ pre-populated locations with continent/zone filtering, search, favorites, and custom entries.
 </p>
 
 <p align="center">
@@ -23,9 +23,13 @@ Find any NPC by category, continent, and zone. Select an entry and set a TomTom 
 
 - 4,300+ entries: quest givers, trainers, flight masters, innkeepers, vendors, banks, and more
 - Continent and zone dropdowns with auto-detect
-- Category tree: Quests, Trainers, Transportation, Services, PvP
+- Category tree: Quests, Trainers, Transportation, Services, PvP, Custom
 - Double-click any entry to set a waypoint instantly
-- Right-click for context menu (set waypoint, edit, delete)
+- Right-click for context menu (set waypoint, favorite, edit, delete)
+
+## Favorites
+
+Mark any entry as a favorite from the right-click menu. Favorites appear in green and are collected in a dedicated Favorites category at the top of the tree for quick access. Favorites persist across sessions.
 
 ## TomTom Integration
 
@@ -41,12 +45,12 @@ Search across all categories by NPC name, zone, or description. Results update a
 
 ## Custom Locations
 
-Save your own locations to a personal address book. Stand anywhere and use `/ab add` or the "Save Here" button. Update existing entry coordinates with `/ab record` as you discover more accurate positions.
+Save your own locations to a personal address book. Click "Add Entry" to open the entry dialog with fields for name, coordinates, zone, and notes. Use the "Current Location" button to auto-fill your position.
 
-- Save current position with a name
-- Edit and delete custom entries
+- Add entries manually or from your current position
+- Edit name, coordinates, zone, and notes
 - Custom entries persist across sessions
-- Right-click minimap button for quick-save
+- Update existing entry coordinates with `/ab record`
 
 ## Filtering
 
@@ -63,9 +67,9 @@ Narrow results with three independent filters that work together:
 | Action | How |
 |--------|-----|
 | Open AddressBook | Left-click minimap button, or `/ab` |
-| Quick-save location | Right-click minimap button |
+| Add entry | Click "Add Entry" button |
 | Search | `/ab search <query>` |
-| Save location | `/ab add [name]` |
+| Add from chat | `/ab add` |
 | Update entry coords | `/ab record <name>` |
 | Set waypoint | `/ab waypoint <name>` |
 
