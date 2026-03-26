@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="55 25 290 360" width="290" height="360">
+  <defs>
+    <linearGradient id="serShield" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#c0a050"/>
+      <stop offset="100%" stop-color="#8a6e30"/>
+    </linearGradient>
+    <linearGradient id="serInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#2a2a3a"/>
+      <stop offset="100%" stop-color="#1a1a28"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d4b050"/>
+      <stop offset="100%" stop-color="#8a6e30"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Shield -->
+  <path d="M200,40 L330,100 L330,220 Q330,310 200,370 Q70,310 70,220 L70,100 Z" fill="url(#serShield)"/>
+  <path d="M200,55 L318,110 L318,218 Q318,300 200,355 Q82,300 82,218 L82,110 Z" fill="url(#serInner)"/>
+
+  <!-- Map -->
+  <path d="M120,95 L198,90 L280,95 L280,195 L198,190 L120,195 Z"
+        fill="none" stroke="#d4b860" stroke-width="2" opacity="0.85"/>
+  <line x1="198" y1="90" x2="198" y2="190" stroke="#d4b860" stroke-width="1" opacity="0.55" stroke-dasharray="4,3"/>
+
+  <!-- Map content -->
+  <path d="M140,120 Q165,112 178,128 Q188,142 185,160 Q180,178 165,188"
+        fill="none" stroke="#d4b860" stroke-width="1.5" opacity="0.55" stroke-dasharray="5,3"/>
+  <path d="M215,110 Q235,130 232,155 Q228,172 248,185"
+        fill="none" stroke="#d4b860" stroke-width="1.5" opacity="0.55" stroke-dasharray="5,3"/>
+  <path d="M178,128 Q195,138 232,155"
+        fill="none" stroke="#d4b860" stroke-width="1" opacity="0.4" stroke-dasharray="3,3"/>
+
+  <!-- Small pins -->
+  <g opacity="0.75">
+    <path d="M152,118 C148,118 146,121 146,123 C146,126 152,131 152,131 C152,131 158,126 158,123 C158,121 156,118 152,118 Z" fill="#d4b860"/>
+    <path d="M245,145 C241,145 239,148 239,150 C239,153 245,158 245,158 C245,158 251,153 251,150 C251,148 249,145 245,145 Z" fill="#d4b860"/>
+  </g>
+
+  <!-- Pin at top of map -->
+  <g transform="translate(200, 95)">
+    <path d="M0,-25 C-14,-25 -20,-14 -20,-4 C-20,8 0,26 0,26 C0,26 20,8 20,-4 C20,-14 14,-25 0,-25 Z"
+          fill="url(#gold)" stroke="#8a6e30" stroke-width="1"/>
+    <circle cx="0" cy="-6" r="8" fill="#1a1a28"/>
+    <circle cx="0" cy="-6" r="3.5" fill="#8a6e30"/>
+  </g>
+
+  <!-- Compass rose -->
+  <g transform="translate(258, 178)" opacity="0.65">
+    <line x1="0" y1="-8" x2="0" y2="8" stroke="#d4b860" stroke-width="1"/>
+    <line x1="-8" y1="0" x2="8" y2="0" stroke="#d4b860" stroke-width="1"/>
+    <polygon points="0,-8 -2,-2 2,-2" fill="#d4b860"/>
+  </g>
+
+  <!-- TomTom-style arrow -->
+  <g transform="translate(200, 225)">
+    <polygon points="0,-30 -22,10 -12,10 -12,30 12,30 12,10 22,10"
+             fill="none" stroke="#c0a050" stroke-width="4.5" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Rank bar -->
+  <rect x="145" y="265" width="110" height="3" fill="#c0a050" rx="1"/>
+  <!-- Title -->
+  <text x="200" y="290" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="#c0a050" letter-spacing="4">ADDRESS</text>
+  <text x="200" y="313" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="20" fill="#c0a050" letter-spacing="4">BOOK</text>
+  <rect x="155" y="320" width="90" height="3" fill="#c0a050" rx="1"/>
+</svg>
