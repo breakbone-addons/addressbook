@@ -3,7 +3,7 @@
   "name": "AddressBook",
   "tagline": "NPC & location finder for TBC Anniversary with TomTom integration",
   "description": "Find any NPC in Azeroth and Outland. Browse 4,300+ quest givers, trainers, flight masters, innkeepers, and vendors organized by category, or search by name and zone. Set TomTom waypoints with a single click and record your own custom locations.",
-  "logo": "art/logo-v1.svg",
+  "logo": "art/logo-transparent.svg",
   "reverse": true,
   "features": [
     {
