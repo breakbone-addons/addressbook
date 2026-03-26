@@ -18,6 +18,37 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Rename zip and fix timestamps
+        id: package
+        run: |
+          cd .release
+          ORIG_ZIP=$(ls AddressBook-*.zip)
+          mkdir -p _tmp && cd _tmp
+          unzip -o "../$ORIG_ZIP"
+          VERSION=$(grep '## Version:' AddressBook/AddressBook.toc | sed 's/## Version: *//;s/\r//')
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
+          ZIPNAME="AddressBook-v${VERSION}-bcc.zip"
+          zip -r "../$ZIPNAME" .
+          cd .. && rm -rf _tmp && rm -f "$ORIG_ZIP"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: AddressBook v${{ steps.package.outputs.version }}-bcc
+          body: |
+            Download **AddressBook-v${{ steps.package.outputs.version }}-bcc.zip** below.
+
+            Extract the `AddressBook` folder into:
+            `World of Warcraft/_anniversary_/Interface/AddOns/AddressBook/`
+          files: .release/AddressBook-v${{ steps.package.outputs.version }}-bcc.zip
+          fail_on_unmatched_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Trigger site rebuild
         if: success()
         run: |
