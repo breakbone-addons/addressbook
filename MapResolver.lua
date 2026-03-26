@@ -141,3 +141,43 @@ function AddressBook:GetAllZonesSorted()
     table.sort(all)
     return all
 end
+
+function AddressBook:GetCurrentZoneName()
+    local mapID = C_Map.GetBestMapForUnit("player")
+    if not mapID then return nil end
+    local info = C_Map.GetMapInfo(mapID)
+    return info and info.name
+end
+
+function AddressBook:GetZonesWithEntries()
+    -- Return only zones that have entries in the current data
+    local zoneSet = {}
+    if self.LocationDB then
+        for cat, subs in pairs(self.LocationDB) do
+            for sub, entries in pairs(subs) do
+                for _, entry in ipairs(entries) do
+                    if entry.zone then
+                        zoneSet[entry.zone] = true
+                    end
+                end
+            end
+        end
+    end
+    if AddressBookDB and AddressBookDB.custom then
+        for cat, subs in pairs(AddressBookDB.custom) do
+            for sub, entries in pairs(subs) do
+                for _, entry in ipairs(entries) do
+                    if entry.zone then
+                        zoneSet[entry.zone] = true
+                    end
+                end
+            end
+        end
+    end
+    local sorted = {}
+    for z in pairs(zoneSet) do
+        sorted[#sorted + 1] = z
+    end
+    table.sort(sorted)
+    return sorted
+end

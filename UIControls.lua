@@ -9,7 +9,7 @@ UI.FRAME_HEIGHT = 450
 UI.CATEGORY_WIDTH = 160
 UI.ROW_HEIGHT = 20
 UI.HEADER_HEIGHT = 30
-UI.FOOTER_HEIGHT = 40
+UI.FOOTER_HEIGHT = 0
 UI.PADDING = 8
 UI.SCROLL_STEP = UI.ROW_HEIGHT * 3
 
@@ -109,11 +109,6 @@ function AddressBook:CreateSearchBox(parent, width)
     box:SetAutoFocus(false)
     box:SetMaxLetters(50)
 
-    local label = box:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    label:SetPoint("RIGHT", box, "LEFT", -4, 0)
-    label:SetText("Search:")
-    label:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
-
     box:SetScript("OnEscapePressed", function(self)
         self:ClearFocus()
     end)
@@ -139,12 +134,15 @@ function AddressBook:CreateCategoryButton(parent, text, level, isExpanded, noArr
     btn:SetHeight(18)
 
     local indent = (level - 1) * 12
-    local arrow = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    arrow:SetPoint("LEFT", btn, "LEFT", indent, 0)
-    btn._arrow = arrow
+
+    -- Toggle icon for expand/collapse (level 1 categories only)
+    local toggleIcon = btn:CreateTexture(nil, "OVERLAY")
+    toggleIcon:SetSize(14, 14)
+    toggleIcon:SetPoint("LEFT", btn, "LEFT", indent, 0)
+    btn._toggleIcon = toggleIcon
 
     local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    label:SetPoint("LEFT", arrow, "RIGHT", 2, 0)
+    label:SetPoint("LEFT", toggleIcon, "RIGHT", 2, 0)
     label:SetPoint("RIGHT", btn, "RIGHT", -2, 0)
     label:SetJustifyH("LEFT")
     label:SetText(text)
@@ -153,14 +151,15 @@ function AddressBook:CreateCategoryButton(parent, text, level, isExpanded, noArr
     if level == 1 then
         label:SetTextColor(UI.COLOR_CATEGORY.r, UI.COLOR_CATEGORY.g, UI.COLOR_CATEGORY.b)
         if noArrow then
-            arrow:SetText("  ")
+            toggleIcon:SetTexture(nil)
+        elseif isExpanded then
+            toggleIcon:SetTexture("Interface\\Buttons\\UI-MinusButton-UP")
         else
-            arrow:SetText(isExpanded and "v " or "> ")
+            toggleIcon:SetTexture("Interface\\Buttons\\UI-PlusButton-UP")
         end
-        arrow:SetTextColor(UI.COLOR_CATEGORY.r, UI.COLOR_CATEGORY.g, UI.COLOR_CATEGORY.b)
     else
         label:SetTextColor(UI.COLOR_SUBCATEGORY.r, UI.COLOR_SUBCATEGORY.g, UI.COLOR_SUBCATEGORY.b)
-        arrow:SetText("  ")
+        toggleIcon:SetTexture(nil)
     end
 
     -- Highlight

@@ -7,6 +7,7 @@ AddressBook = AddressBook or {}
 -- Category display order
 AddressBook.CategoryOrder = {
     "Quests",
+    "Instances",
     "Trainers",
     "Transportation",
     "Services",
@@ -15,6 +16,7 @@ AddressBook.CategoryOrder = {
 
 AddressBook.SubcategoryOrder = {
     ["Quests"] = { "Quest Givers" },
+    ["Instances"] = { "Dungeons", "Raids" },
     ["Trainers"] = { "Class Trainers", "Profession Trainers", "Weapon & Riding", "Other Trainers" },
     ["Transportation"] = { "Flight Masters" },
     ["Services"] = { "Innkeepers", "Repair Vendors", "Banks", "Auction Houses", "Stable Masters" },
@@ -4262,6 +4264,82 @@ AddressBook.LocationDB = {
             { name = "Joraal", zone = "Zangarmarsh", x = 67.62, y = 49.7, faction = "Alliance", note = "Stable Master" },
             { name = "Kameel Longstride", zone = "Zangarmarsh", x = 78.73, y = 64.35, note = "Stable Master" },
             { name = "Khalan", zone = "Zangarmarsh", x = 31.74, y = 49.79, faction = "Horde", note = "Stable Master" },
+        },
+    },
+    -----------------------------------------------------------------
+    -- INSTANCES
+    -----------------------------------------------------------------
+    ["Instances"] = {
+        ["Dungeons"] = {
+            -- Classic - Kalimdor
+            { name = "Ragefire Chasm", zone = "Orgrimmar", x = 52.8, y = 49.6, faction = "Horde", note = "Dungeon (13-18)" },
+            { name = "Wailing Caverns", zone = "The Barrens", x = 46.0, y = 36.0, note = "Dungeon (17-24)" },
+            { name = "Blackfathom Deeps", zone = "Ashenvale", x = 14.0, y = 14.0, note = "Dungeon (24-32)" },
+            { name = "Razorfen Kraul", zone = "The Barrens", x = 42.0, y = 90.0, note = "Dungeon (29-38)" },
+            { name = "Razorfen Downs", zone = "The Barrens", x = 50.0, y = 92.0, note = "Dungeon (37-46)" },
+            { name = "Maraudon", zone = "Desolace", x = 29.1, y = 62.5, note = "Dungeon (46-55)" },
+            { name = "Zul'Farrak", zone = "Tanaris", x = 39.2, y = 21.3, note = "Dungeon (44-54)" },
+            { name = "Dire Maul East", zone = "Feralas", x = 66.7, y = 34.8, note = "Dungeon (56-60)" },
+            { name = "Dire Maul West", zone = "Feralas", x = 60.3, y = 30.6, note = "Dungeon (56-60)" },
+            { name = "Dire Maul North", zone = "Feralas", x = 62.5, y = 24.9, note = "Dungeon (56-60)" },
+            -- Classic - Eastern Kingdoms
+            { name = "The Deadmines", zone = "Westfall", x = 42.6, y = 71.8, note = "Dungeon (17-26)" },
+            { name = "The Stockade", zone = "Stormwind City", x = 50.4, y = 66.4, faction = "Alliance", note = "Dungeon (22-30)" },
+            { name = "Shadowfang Keep", zone = "Silverpine Forest", x = 44.8, y = 67.8, note = "Dungeon (22-30)" },
+            { name = "Gnomeregan", zone = "Dun Morogh", x = 24.2, y = 39.8, note = "Dungeon (29-38)" },
+            { name = "Scarlet Monastery - Graveyard", zone = "Tirisfal Glades", x = 84.9, y = 30.6, note = "Dungeon (26-36)" },
+            { name = "Scarlet Monastery - Library", zone = "Tirisfal Glades", x = 84.9, y = 30.6, note = "Dungeon (29-39)" },
+            { name = "Scarlet Monastery - Armory", zone = "Tirisfal Glades", x = 84.9, y = 30.6, note = "Dungeon (32-42)" },
+            { name = "Scarlet Monastery - Cathedral", zone = "Tirisfal Glades", x = 84.9, y = 30.6, note = "Dungeon (35-45)" },
+            { name = "Uldaman", zone = "Badlands", x = 41.8, y = 11.3, note = "Dungeon (41-51)" },
+            { name = "Sunken Temple", zone = "Swamp of Sorrows", x = 69.4, y = 54.4, note = "Dungeon (50-56)" },
+            { name = "Blackrock Depths", zone = "Searing Gorge", x = 34.8, y = 85.3, note = "Dungeon (52-60), inside Blackrock Mountain" },
+            { name = "Lower Blackrock Spire", zone = "Searing Gorge", x = 34.8, y = 85.3, note = "Dungeon (55-60), inside Blackrock Mountain" },
+            { name = "Upper Blackrock Spire", zone = "Searing Gorge", x = 34.8, y = 85.3, note = "Dungeon (58-60, 10-man), inside Blackrock Mountain" },
+            { name = "Stratholme - Main Gate", zone = "Eastern Plaguelands", x = 27.5, y = 11.6, note = "Dungeon (58-60), Living side" },
+            { name = "Stratholme - Service Entrance", zone = "Eastern Plaguelands", x = 43.5, y = 19.4, note = "Dungeon (58-60), Undead side" },
+            { name = "Scholomance", zone = "Western Plaguelands", x = 69.4, y = 72.8, note = "Dungeon (58-60)" },
+            -- TBC - Hellfire Citadel
+            { name = "Hellfire Ramparts", zone = "Hellfire Peninsula", x = 47.7, y = 53.6, note = "Dungeon (60-62), Normal/Heroic" },
+            { name = "The Blood Furnace", zone = "Hellfire Peninsula", x = 46.0, y = 51.8, note = "Dungeon (61-63), Normal/Heroic" },
+            { name = "The Shattered Halls", zone = "Hellfire Peninsula", x = 47.7, y = 52.0, note = "Dungeon (70), Normal/Heroic" },
+            -- TBC - Coilfang Reservoir
+            { name = "The Slave Pens", zone = "Zangarmarsh", x = 48.9, y = 35.6, note = "Dungeon (62-64), Normal/Heroic" },
+            { name = "The Underbog", zone = "Zangarmarsh", x = 54.0, y = 34.1, note = "Dungeon (63-65), Normal/Heroic" },
+            { name = "The Steamvault", zone = "Zangarmarsh", x = 50.2, y = 33.2, note = "Dungeon (70), Normal/Heroic" },
+            -- TBC - Auchindoun
+            { name = "Mana-Tombs", zone = "Terokkar Forest", x = 39.7, y = 57.7, note = "Dungeon (64-66), Normal/Heroic" },
+            { name = "Auchenai Crypts", zone = "Terokkar Forest", x = 34.3, y = 65.6, note = "Dungeon (65-67), Normal/Heroic" },
+            { name = "Sethekk Halls", zone = "Terokkar Forest", x = 44.9, y = 65.6, note = "Dungeon (67-69), Normal/Heroic" },
+            { name = "Shadow Labyrinth", zone = "Terokkar Forest", x = 39.6, y = 73.6, note = "Dungeon (70), Normal/Heroic" },
+            -- TBC - Caverns of Time
+            { name = "Old Hillsbrad Foothills", zone = "Tanaris", x = 66.2, y = 49.3, note = "Dungeon (66-68), Normal/Heroic, Caverns of Time" },
+            { name = "The Black Morass", zone = "Tanaris", x = 66.2, y = 49.3, note = "Dungeon (70), Normal/Heroic, Caverns of Time" },
+            -- TBC - Tempest Keep
+            { name = "The Mechanar", zone = "Netherstorm", x = 70.6, y = 69.8, note = "Dungeon (69-70), Normal/Heroic" },
+            { name = "The Botanica", zone = "Netherstorm", x = 71.7, y = 55.0, note = "Dungeon (70), Normal/Heroic" },
+            { name = "The Arcatraz", zone = "Netherstorm", x = 74.4, y = 57.7, note = "Dungeon (70), Normal/Heroic" },
+            -- TBC - Isle of Quel'Danas
+            { name = "Magisters' Terrace", zone = "Isle of Quel'Danas", x = 61.3, y = 30.9, note = "Dungeon (70), Normal/Heroic" },
+        },
+        ["Raids"] = {
+            -- Classic
+            { name = "Onyxia's Lair", zone = "Dustwallow Marsh", x = 52.0, y = 76.8, note = "Raid (40-man, Level 60)" },
+            { name = "Molten Core", zone = "Searing Gorge", x = 34.8, y = 85.3, note = "Raid (40-man, Level 60), inside Blackrock Mountain" },
+            { name = "Blackwing Lair", zone = "Searing Gorge", x = 34.8, y = 85.3, note = "Raid (40-man, Level 60), inside Blackrock Mountain" },
+            { name = "Zul'Gurub", zone = "Stranglethorn Vale", x = 72.2, y = 32.9, note = "Raid (20-man, Level 60)" },
+            { name = "Ruins of Ahn'Qiraj", zone = "Silithus", x = 36.4, y = 84.2, note = "Raid (20-man, Level 60)" },
+            { name = "Temple of Ahn'Qiraj", zone = "Silithus", x = 24.0, y = 87.0, note = "Raid (40-man, Level 60)" },
+            -- TBC
+            { name = "Karazhan", zone = "Deadwind Pass", x = 47.0, y = 75.0, note = "Raid (10-man, Level 70)" },
+            { name = "Gruul's Lair", zone = "Blade's Edge Mountains", x = 68.5, y = 24.3, note = "Raid (25-man, Level 70)" },
+            { name = "Magtheridon's Lair", zone = "Hellfire Peninsula", x = 46.4, y = 52.8, note = "Raid (25-man, Level 70)" },
+            { name = "Serpentshrine Cavern", zone = "Zangarmarsh", x = 50.8, y = 37.9, note = "Raid (25-man, Level 70)" },
+            { name = "Tempest Keep: The Eye", zone = "Netherstorm", x = 73.8, y = 63.8, note = "Raid (25-man, Level 70)" },
+            { name = "Battle for Mount Hyjal", zone = "Tanaris", x = 66.2, y = 49.3, note = "Raid (25-man, Level 70), Caverns of Time" },
+            { name = "Black Temple", zone = "Shadowmoon Valley", x = 71.0, y = 46.0, note = "Raid (25-man, Level 70)" },
+            { name = "Zul'Aman", zone = "Ghostlands", x = 82.1, y = 64.3, note = "Raid (10-man, Level 70)" },
+            { name = "Sunwell Plateau", zone = "Isle of Quel'Danas", x = 44.3, y = 45.7, note = "Raid (25-man, Level 70)" },
         },
     },
     -----------------------------------------------------------------

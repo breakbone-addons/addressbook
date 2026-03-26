@@ -1,5 +1,13 @@
 # AddressBook Changelog
 
+## 1.2.0
+- Added dungeon and raid instance entrances (42 dungeons, 15 raids covering Classic and TBC)
+- Added Nearest button to highlight the closest location in the current list
+- Added right-click minimap button menu showing favorites for quick waypoint access
+- Reorganized header controls: continent/zone Auto checkboxes, improved layout
+- Zone dropdown now only shows zones that have entries in the database
+- Character limits on custom entry fields (30 name, 60 note)
+
 ## 1.1.0
 - Added favorites: right-click any entry to mark as favorite, shown in green with a dedicated Favorites category
 - Added full Add Entry dialog with name, coordinates, zone, and note fields

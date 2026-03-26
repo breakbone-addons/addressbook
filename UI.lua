@@ -13,7 +13,7 @@ local categoryButtons = {}
 local searchText = ""
 local searchTimer = nil
 local selectedContinent = "Auto"  -- nil=All, "Auto"=auto-detect, or continent name
-local selectedZone = "Auto"       -- nil=All, "Auto"=auto-detect, or zone name
+local selectedZone = nil          -- nil=All, "Auto"=auto-detect, or zone name
 
 -- Forward declarations
 local RefreshCategoryList, RefreshEntryList, UpdateWaypointButton
@@ -54,16 +54,21 @@ function AddressBook:CreateMainFrame()
     -- Close on ESC
     tinsert(UISpecialFrames, "AddressBookMainFrame")
 
-    -- Title
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
-    title:SetPoint("TOP", frame, "TOP", 0, -14)
-    title:SetText("|cff33bbffAddressBook|r")
+    -- Title bar (standard WoW dialog header)
+    local titleBar = frame:CreateTexture(nil, "ARTWORK")
+    titleBar:SetTexture("Interface\\DialogFrame\\UI-DialogBox-Header")
+    titleBar:SetSize(220, 64)
+    titleBar:SetPoint("TOP", 0, 12)
 
-    -- Close button
+    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    title:SetPoint("TOP", titleBar, "TOP", 0, -14)
+    title:SetText("AddressBook")
+
+    -- Close button (top right)
     local closeBtn = CreateFrame("Button", nil, frame, "UIPanelCloseButton")
     closeBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
 
-    -- TomTom status indicator
+    -- TomTom status indicator (left of close)
     local tomtomStatus = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
     tomtomStatus:SetPoint("TOPRIGHT", closeBtn, "TOPLEFT", -8, -8)
     if AddressBook:HasTomTom() then
@@ -73,45 +78,85 @@ function AddressBook:CreateMainFrame()
     end
 
     -------------------------------------------------------------------
-    -- FILTER ROW (continent, zone, search, save here)
+    -- ROW 1: Continent dropdown + Auto + My Faction (left), Search + count (right)
     -------------------------------------------------------------------
-    local filterY = -UI.HEADER_HEIGHT - 4
+    local row1Y = -UI.HEADER_HEIGHT - 4
 
-    -- Continent dropdown
+    local contLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    contLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + 10, row1Y - 5)
+    contLabel:SetText("Continent:")
+    contLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+
     local continentDropdown = CreateFrame("Frame", "AddressBookContinentDropdown", frame, "UIDropDownMenuTemplate")
-    continentDropdown:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + UI.CATEGORY_WIDTH - 12, filterY)
-    UIDropDownMenu_SetWidth(continentDropdown, 100)
-    UIDropDownMenu_SetText(continentDropdown, "Auto")
+    continentDropdown:SetPoint("LEFT", contLabel, "RIGHT", -12, -2)
+    UIDropDownMenu_SetWidth(continentDropdown, 130)
+
+    -- Continent Auto checkbox
+    local contAutoCheck = CreateFrame("CheckButton", "AddressBookContAutoFilter", frame, "UICheckButtonTemplate")
+    contAutoCheck:SetPoint("LEFT", continentDropdown, "RIGHT", -8, 0)
+    contAutoCheck:SetSize(20, 20)
+    contAutoCheck:SetChecked(true)
+    _G["AddressBookContAutoFilterText"]:SetText("Auto")
+    _G["AddressBookContAutoFilterText"]:SetFontObject("GameFontNormalSmall")
+
+    -- My Faction checkbox (right of continent Auto)
+    local factionCheck = CreateFrame("CheckButton", "AddressBookFactionFilter", frame, "UICheckButtonTemplate")
+    factionCheck:SetPoint("LEFT", contAutoCheck, "RIGHT", 32, 0)
+    factionCheck:SetSize(20, 20)
+    factionCheck:SetChecked(AddressBookDB and AddressBookDB.settings and AddressBookDB.settings.showFactionOnly)
+    _G["AddressBookFactionFilterText"]:SetText("My Faction")
+    _G["AddressBookFactionFilterText"]:SetFontObject("GameFontNormalSmall")
+    factionCheck:SetScript("OnClick", function(self)
+        if AddressBookDB and AddressBookDB.settings then
+            AddressBookDB.settings.showFactionOnly = self:GetChecked()
+            RefreshEntryList()
+        end
+    end)
+
+    -- Search label + box + count (right side of row 1)
+    local searchLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    searchLabel:SetPoint("LEFT", factionCheck, "RIGHT", 80, 0)
+    searchLabel:SetText("Search:")
+    searchLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+
+    local searchBox = self:CreateSearchBox(frame, 120)
+    searchBox:SetPoint("LEFT", searchLabel, "RIGHT", 8, 0)
+    searchBox:SetPoint("RIGHT", frame, "RIGHT", -UI.PADDING - 8, 0)
+
+    searchBox:SetScript("OnTextChanged", function(self)
+        searchText = strtrim(self:GetText() or "")
+        RefreshEntryList()
+    end)
+
+    frame._searchBox = searchBox
+
+    -- Entry count (right side, same row as TomTom status)
+    local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    countText:SetPoint("RIGHT", tomtomStatus, "LEFT", -12, 0)
+    countText:SetTextColor(0.5, 0.5, 0.5)
+    frame._countText = countText
+
+    -- Resolve initial continent for Auto default
+    local resolvedZone = AddressBook:GetCurrentZoneName()
+    local resolvedCont = resolvedZone and AddressBook:GetContinentForZone(resolvedZone)
+    UIDropDownMenu_SetText(continentDropdown, resolvedCont or "All")
 
     local function ContinentDropdown_Init(self, level)
         local info = UIDropDownMenu_CreateInfo()
 
-        -- Auto option
-        info.text = "Auto"
-        info.notCheckable = true
-        info.func = function()
-            selectedContinent = "Auto"
-            selectedZone = "Auto"
-            UIDropDownMenu_SetText(continentDropdown, "Auto")
-            UIDropDownMenu_SetText(frame._zoneDropdown, "Auto")
-            RefreshEntryList()
-        end
-        UIDropDownMenu_AddButton(info, level)
-
-        -- All option
-        info = UIDropDownMenu_CreateInfo()
         info.text = "All Continents"
         info.notCheckable = true
         info.func = function()
             selectedContinent = nil
             selectedZone = nil
+            contAutoCheck:SetChecked(false)
             UIDropDownMenu_SetText(continentDropdown, "All")
             UIDropDownMenu_SetText(frame._zoneDropdown, "All")
+            if frame._zoneAutoCheck then frame._zoneAutoCheck:SetChecked(false) end
             RefreshEntryList()
         end
         UIDropDownMenu_AddButton(info, level)
 
-        -- Continent list
         local continents = AddressBook:GetContinents()
         for _, name in ipairs(continents) do
             info = UIDropDownMenu_CreateInfo()
@@ -120,8 +165,10 @@ function AddressBook:CreateMainFrame()
             info.func = function()
                 selectedContinent = name
                 selectedZone = nil
+                contAutoCheck:SetChecked(false)
                 UIDropDownMenu_SetText(continentDropdown, name)
                 UIDropDownMenu_SetText(frame._zoneDropdown, "All")
+                if frame._zoneAutoCheck then frame._zoneAutoCheck:SetChecked(false) end
                 RefreshEntryList()
             end
             UIDropDownMenu_AddButton(info, level)
@@ -129,48 +176,65 @@ function AddressBook:CreateMainFrame()
     end
     UIDropDownMenu_Initialize(continentDropdown, ContinentDropdown_Init)
 
-    local contLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    contLabel:SetPoint("RIGHT", continentDropdown, "LEFT", 16, 2)
-    contLabel:SetText("Continent:")
-    contLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+    contAutoCheck:SetScript("OnClick", function(self)
+        if self:GetChecked() then
+            selectedContinent = "Auto"
+            -- Resolve and select current continent in dropdown
+            local rZone = AddressBook:GetCurrentZoneName()
+            local rCont = rZone and AddressBook:GetContinentForZone(rZone)
+            UIDropDownMenu_SetText(continentDropdown, rCont or "All")
+        else
+            selectedContinent = nil
+            UIDropDownMenu_SetText(continentDropdown, "All")
+        end
+        RefreshEntryList()
+    end)
 
-    -- Zone dropdown
+    frame._continentDropdown = continentDropdown
+
+    -------------------------------------------------------------------
+    -- ROW 2: Zone dropdown + Auto checkbox, Nearest, Set WP, Clear WP, Add Entry
+    -------------------------------------------------------------------
+    local row2Y = row1Y - 26
+
+    local zoneLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    zoneLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + 10, row2Y - 5)
+    zoneLabel:SetText("Zone:")
+    zoneLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+
     local zoneDropdown = CreateFrame("Frame", "AddressBookZoneDropdown", frame, "UIDropDownMenuTemplate")
-    zoneDropdown:SetPoint("LEFT", continentDropdown, "RIGHT", -16, 0)
-    UIDropDownMenu_SetWidth(zoneDropdown, 110)
-    UIDropDownMenu_SetText(zoneDropdown, "Auto")
+    zoneDropdown:SetPoint("LEFT", contLabel, "RIGHT", -12, row2Y - row1Y)
+    UIDropDownMenu_SetWidth(zoneDropdown, 130)
+    UIDropDownMenu_SetText(zoneDropdown, "All")
     frame._zoneDropdown = zoneDropdown
+
+    -- Zone Auto checkbox
+    local zoneAutoCheck = CreateFrame("CheckButton", "AddressBookZoneAutoFilter", frame, "UICheckButtonTemplate")
+    zoneAutoCheck:SetPoint("LEFT", zoneDropdown, "RIGHT", -8, 0)
+    zoneAutoCheck:SetSize(20, 20)
+    zoneAutoCheck:SetChecked(false)
+    _G["AddressBookZoneAutoFilterText"]:SetText("Auto")
+    _G["AddressBookZoneAutoFilterText"]:SetFontObject("GameFontNormalSmall")
+    frame._zoneAutoCheck = zoneAutoCheck
 
     local function ZoneDropdown_Init(self, level)
         local info = UIDropDownMenu_CreateInfo()
 
-        -- Auto option
-        info.text = "Auto"
-        info.notCheckable = true
-        info.func = function()
-            selectedZone = "Auto"
-            UIDropDownMenu_SetText(zoneDropdown, "Auto")
-            RefreshEntryList()
-        end
-        UIDropDownMenu_AddButton(info, level)
-
-        -- All option
-        info = UIDropDownMenu_CreateInfo()
         info.text = "All Zones"
         info.notCheckable = true
         info.func = function()
             selectedZone = nil
+            zoneAutoCheck:SetChecked(false)
             UIDropDownMenu_SetText(zoneDropdown, "All")
             RefreshEntryList()
         end
         UIDropDownMenu_AddButton(info, level)
 
-        -- Zone list based on selected continent
         local zones
         if selectedContinent and selectedContinent ~= "Auto" then
             zones = AddressBook:GetZonesForContinent(selectedContinent)
         else
-            zones = AddressBook:GetAllZonesSorted()
+            zones = AddressBook:GetZonesWithEntries()
         end
         for _, name in ipairs(zones) do
             info = UIDropDownMenu_CreateInfo()
@@ -178,12 +242,13 @@ function AddressBook:CreateMainFrame()
             info.notCheckable = true
             info.func = function()
                 selectedZone = name
+                zoneAutoCheck:SetChecked(false)
                 UIDropDownMenu_SetText(zoneDropdown, name)
-                -- Auto-set continent if not already set
                 if not selectedContinent or selectedContinent == "Auto" then
                     local cont = AddressBook:GetContinentForZone(name)
                     if cont then
                         selectedContinent = cont
+                        contAutoCheck:SetChecked(false)
                         UIDropDownMenu_SetText(continentDropdown, cont)
                     end
                 end
@@ -194,25 +259,56 @@ function AddressBook:CreateMainFrame()
     end
     UIDropDownMenu_Initialize(zoneDropdown, ZoneDropdown_Init)
 
-    -- Search box (second row)
-    local filterY2 = filterY - 26
-    local searchBox = self:CreateSearchBox(frame, 160)
-    searchBox:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + UI.CATEGORY_WIDTH + 50, filterY2)
-
-    searchBox:SetScript("OnTextChanged", function(self)
-        searchText = strtrim(self:GetText() or "")
+    zoneAutoCheck:SetScript("OnClick", function(self)
+        if self:GetChecked() then
+            selectedZone = "Auto"
+            local rZone = AddressBook:GetCurrentZoneName()
+            UIDropDownMenu_SetText(zoneDropdown, rZone or "All")
+            -- Also auto the continent if not already
+            if not contAutoCheck:GetChecked() then
+                contAutoCheck:SetChecked(true)
+                selectedContinent = "Auto"
+                local rCont = rZone and AddressBook:GetContinentForZone(rZone)
+                UIDropDownMenu_SetText(continentDropdown, rCont or "All")
+            end
+        else
+            selectedZone = nil
+            UIDropDownMenu_SetText(zoneDropdown, "All")
+        end
         RefreshEntryList()
     end)
 
-    frame._searchBox = searchBox
-    frame._continentDropdown = continentDropdown
+    -- Right side: Add Entry, Clear WP, Set Waypoint
+    local addBtn = AddressBook:CreateButton(frame, "Add Entry", 65, 20)
+    addBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -UI.PADDING - 8, row2Y - 2)
+    addBtn:SetScript("OnClick", function()
+        AddressBook:ShowEditDialog(nil)
+    end)
+
+    local clearBtn = AddressBook:CreateButton(frame, "Clear WP", 55, 20)
+    clearBtn:SetPoint("RIGHT", addBtn, "LEFT", -4, 0)
+    clearBtn:SetScript("OnClick", function()
+        AddressBook:ClearWaypoint()
+        AddressBook:Print("Waypoint cleared.")
+    end)
+
+    local waypointBtn = AddressBook:CreateButton(frame, "Set WP", 50, 20)
+    waypointBtn:SetPoint("RIGHT", clearBtn, "LEFT", -4, 0)
+    waypointBtn:Disable()
+    waypointBtn:SetScript("OnClick", function()
+        if selectedEntryData then
+            AddressBook:SetWaypoint(selectedEntryData.entry)
+        end
+    end)
+    frame._waypointBtn = waypointBtn
 
     -------------------------------------------------------------------
     -- CATEGORY PANEL (left side)
     -------------------------------------------------------------------
+    local topBarHeight = UI.HEADER_HEIGHT + 58
     local catPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
-    catPanel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING, -(UI.HEADER_HEIGHT + 58))
-    catPanel:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", UI.PADDING, UI.FOOTER_HEIGHT + UI.PADDING)
+    catPanel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING, -topBarHeight)
+    catPanel:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", UI.PADDING, UI.PADDING)
     catPanel:SetWidth(UI.CATEGORY_WIDTH)
     catPanel:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -224,8 +320,8 @@ function AddressBook:CreateMainFrame()
 
     -- Category scroll frame
     local catScroll = CreateFrame("ScrollFrame", "AddressBookCatScroll", catPanel, "UIPanelScrollFrameTemplate")
-    catScroll:SetPoint("TOPLEFT", catPanel, "TOPLEFT", 4, -4)
-    catScroll:SetPoint("BOTTOMRIGHT", catPanel, "BOTTOMRIGHT", -22, 4)
+    catScroll:SetPoint("TOPLEFT", catPanel, "TOPLEFT", 4, -8)
+    catScroll:SetPoint("BOTTOMRIGHT", catPanel, "BOTTOMRIGHT", -26, 8)
 
     local catChild = CreateFrame("Frame", nil, catScroll)
     catChild:SetWidth(UI.CATEGORY_WIDTH - 26)
@@ -240,7 +336,7 @@ function AddressBook:CreateMainFrame()
     -------------------------------------------------------------------
     local listPanel = CreateFrame("Frame", nil, frame, "BackdropTemplate")
     listPanel:SetPoint("TOPLEFT", catPanel, "TOPRIGHT", 4, 0)
-    listPanel:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -UI.PADDING, UI.FOOTER_HEIGHT + UI.PADDING)
+    listPanel:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -UI.PADDING, UI.PADDING)
     listPanel:SetBackdrop({
         bgFile = "Interface\\Buttons\\WHITE8x8",
         edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
@@ -265,10 +361,22 @@ function AddressBook:CreateMainFrame()
     headerNote:SetText("Note")
     headerNote:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
 
+    -- Nearest button (centered over Zone column, same row as other buttons)
+    -- Zone header is at listPanel TOPLEFT + (8 + 164) = catPanel right + 4 + 172
+    -- catPanel starts at PADDING(8), width CATEGORY_WIDTH(160), so listPanel left ~= 172
+    -- Zone header left ~= 172 + 172 = 344 from frame left; zone col is ~114px wide, center ~= 344+57 = 401
+    -- But the frame is 600 wide, so 401 is too far. Let me just place it left of waypointBtn.
+    local nearestBtn = AddressBook:CreateButton(frame, "Nearest", 55, 20)
+    nearestBtn:SetPoint("RIGHT", waypointBtn, "LEFT", -24, 0)
+    nearestBtn:SetScript("OnClick", function()
+        AddressBook:FindNearest()
+    end)
+    frame._nearestBtn = nearestBtn
+
     -- Entry scroll frame
     local entryScroll = CreateFrame("ScrollFrame", "AddressBookEntryScroll", listPanel, "UIPanelScrollFrameTemplate")
     entryScroll:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 4, -20)
-    entryScroll:SetPoint("BOTTOMRIGHT", listPanel, "BOTTOMRIGHT", -22, 4)
+    entryScroll:SetPoint("BOTTOMRIGHT", listPanel, "BOTTOMRIGHT", -26, 8)
 
     local entryChild = CreateFrame("Frame", nil, entryScroll)
     entryChild:SetWidth(listPanel:GetWidth() - 26)
@@ -277,52 +385,6 @@ function AddressBook:CreateMainFrame()
     frame._listPanel = listPanel
     frame._entryScroll = entryScroll
     frame._entryChild = entryChild
-
-    -------------------------------------------------------------------
-    -- FOOTER BUTTONS
-    -------------------------------------------------------------------
-    local waypointBtn = AddressBook:CreateButton(frame, "Set Waypoint", 100, 24)
-    waypointBtn:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", -UI.PADDING - 8, UI.PADDING + 8)
-    waypointBtn:Disable()
-    waypointBtn:SetScript("OnClick", function()
-        if selectedEntryData then
-            AddressBook:SetWaypoint(selectedEntryData.entry)
-        end
-    end)
-    frame._waypointBtn = waypointBtn
-
-    local clearBtn = AddressBook:CreateButton(frame, "Clear WP", 70, 24)
-    clearBtn:SetPoint("RIGHT", waypointBtn, "LEFT", -4, 0)
-    clearBtn:SetScript("OnClick", function()
-        AddressBook:ClearWaypoint()
-        AddressBook:Print("Waypoint cleared.")
-    end)
-
-    local addBtn = AddressBook:CreateButton(frame, "Add Entry", 80, 24)
-    addBtn:SetPoint("BOTTOMLEFT", frame, "BOTTOMLEFT", UI.PADDING + 8, UI.PADDING + 8)
-    addBtn:SetScript("OnClick", function()
-        AddressBook:ShowEditDialog(nil)
-    end)
-
-    -- Faction filter checkbox
-    local factionCheck = CreateFrame("CheckButton", "AddressBookFactionFilter", frame, "UICheckButtonTemplate")
-    factionCheck:SetPoint("LEFT", addBtn, "RIGHT", 8, 0)
-    factionCheck:SetSize(24, 24)
-    factionCheck:SetChecked(AddressBookDB and AddressBookDB.settings and AddressBookDB.settings.showFactionOnly)
-    _G["AddressBookFactionFilterText"]:SetText("My Faction")
-    _G["AddressBookFactionFilterText"]:SetFontObject("GameFontNormalSmall")
-    factionCheck:SetScript("OnClick", function(self)
-        if AddressBookDB and AddressBookDB.settings then
-            AddressBookDB.settings.showFactionOnly = self:GetChecked()
-            RefreshEntryList()
-        end
-    end)
-
-    -- Entry count
-    local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
-    countText:SetPoint("BOTTOM", frame, "BOTTOM", 0, UI.PADDING + 12)
-    countText:SetTextColor(0.5, 0.5, 0.5)
-    frame._countText = countText
 
     -------------------------------------------------------------------
     -- STATIC POPUPS
@@ -680,9 +742,123 @@ function AddressBook:RefreshUI()
     end
 end
 
+function AddressBook:SelectCategory(category, subcategory)
+    expandedCategories[category] = true
+    selectedCategory = category
+    selectedSubcategory = subcategory
+    -- Clear zone/continent filters so the entry is visible
+    selectedContinent = nil
+    selectedZone = nil
+    if self.mainFrame then
+        if self.mainFrame._continentDropdown then
+            UIDropDownMenu_SetText(self.mainFrame._continentDropdown, "All")
+        end
+        if self.mainFrame._zoneDropdown then
+            UIDropDownMenu_SetText(self.mainFrame._zoneDropdown, "All")
+        end
+        -- Uncheck auto checkboxes
+        local contAuto = _G["AddressBookContAutoFilter"]
+        if contAuto then contAuto:SetChecked(false) end
+        if self.mainFrame._zoneAutoCheck then self.mainFrame._zoneAutoCheck:SetChecked(false) end
+    end
+    if AddressBookCharDB then
+        AddressBookCharDB.lastCategory = category
+        AddressBookCharDB.lastSubcategory = subcategory
+    end
+    self:RefreshUI()
+end
+
 -------------------------------------------------------------------
--- EDIT DIALOG
+-- NEAREST
 -------------------------------------------------------------------
+function AddressBook:FindNearest()
+    if #displayedRows == 0 then
+        self:Print("No entries in the current list.")
+        return
+    end
+
+    local playerMap = C_Map.GetBestMapForUnit("player")
+    if not playerMap then
+        self:Print("Cannot determine your position.")
+        return
+    end
+    local pos = C_Map.GetPlayerMapPosition(playerMap, "player")
+    if not pos then
+        self:Print("Cannot determine your position.")
+        return
+    end
+    local px, py = pos:GetXY()
+
+    -- Find the nearest entry that shares the same mapID as the player
+    local bestRow, bestDist
+    for _, row in ipairs(displayedRows) do
+        local e = row._data and row._data.entry
+        if e and e.mapID and e.mapID == playerMap then
+            -- Same map: simple 2D distance on normalized coords
+            local ex, ey = (e.x or 0) / 100, (e.y or 0) / 100
+            local dx, dy = px - ex, py - ey
+            local dist = dx * dx + dy * dy
+            if not bestDist or dist < bestDist then
+                bestDist = dist
+                bestRow = row
+            end
+        end
+    end
+
+    if not bestRow then
+        -- Fallback: try same continent via world coordinates
+        for _, row in ipairs(displayedRows) do
+            local e = row._data and row._data.entry
+            if e and e.mapID then
+                -- Use C_Map to check if we can get a vector between the two points
+                local ePos = CreateVector2D((e.x or 0) / 100, (e.y or 0) / 100)
+                -- Try getting world position for both
+                local _, pwPos = C_Map.GetWorldPosFromMapPos(playerMap, pos)
+                local eMapPos = CreateVector2D((e.x or 0) / 100, (e.y or 0) / 100)
+                local _, ewPos = C_Map.GetWorldPosFromMapPos(e.mapID, eMapPos)
+                if pwPos and ewPos then
+                    local dx = pwPos.x - ewPos.x
+                    local dy = pwPos.y - ewPos.y
+                    local dist = dx * dx + dy * dy
+                    if not bestDist or dist < bestDist then
+                        bestDist = dist
+                        bestRow = row
+                    end
+                end
+            end
+        end
+    end
+
+    if not bestRow then
+        self:Print("No nearby entries found.")
+        return
+    end
+
+    -- Select the nearest row
+    for _, r in ipairs(displayedRows) do
+        if r._selected then r._selected:Hide() end
+    end
+    bestRow._selected:Show()
+    selectedEntryData = bestRow._data
+    self.selectedEntry = bestRow._data
+    UpdateWaypointButton()
+
+    -- Scroll to the row
+    local scroll = self.mainFrame._entryScroll
+    local rowTop = (bestRow._entryIndex - 1) * UI.ROW_HEIGHT
+    local visibleHeight = scroll:GetHeight()
+    local currentScroll = scroll:GetVerticalScroll()
+
+    if rowTop < currentScroll or rowTop + UI.ROW_HEIGHT > currentScroll + visibleHeight then
+        scroll:SetVerticalScroll(math.max(0, rowTop - visibleHeight / 2 + UI.ROW_HEIGHT / 2))
+    end
+
+    self:Print(format("Nearest: %s (%.1f, %.1f)",
+        bestRow._data.entry.name,
+        bestRow._data.entry.x or 0,
+        bestRow._data.entry.y or 0))
+end
+
 -------------------------------------------------------------------
 -- EDIT / ADD ENTRY DIALOG
 -------------------------------------------------------------------

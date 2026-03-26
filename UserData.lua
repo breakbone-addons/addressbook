@@ -90,7 +90,10 @@ function AddressBook:AddCustomEntry(category, subcategory, entry)
     local list = AddressBookDB.custom[category][subcategory]
     list[#list + 1] = entry
 
-    if self.RefreshUI then
+    -- Auto-navigate to the new entry's category
+    if self.SelectCategory then
+        self:SelectCategory(category, subcategory)
+    elseif self.RefreshUI then
         self:RefreshUI()
     end
 end

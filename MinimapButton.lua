@@ -1,5 +1,57 @@
 AddressBook = AddressBook or {}
 
+-- Persistent context menu frame for favorites
+local favMenuFrame = CreateFrame("Frame", "AddressBookFavMinimapMenu", UIParent, "UIDropDownMenuTemplate")
+
+local function ShowFavoritesMenu()
+    local favorites = AddressBook:GetFavorites()
+
+    local function InitMenu(self, level)
+        if not level then return end
+
+        local info = UIDropDownMenu_CreateInfo()
+
+        -- Title
+        info.text = "|cff33bbffFavorites|r"
+        info.isTitle = true
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        if #favorites == 0 then
+            info = UIDropDownMenu_CreateInfo()
+            info.text = "No favorites yet"
+            info.disabled = true
+            info.notCheckable = true
+            UIDropDownMenu_AddButton(info, level)
+        else
+            for _, fav in ipairs(favorites) do
+                info = UIDropDownMenu_CreateInfo()
+                info.text = fav.entry.name
+                info.notCheckable = true
+                info.func = function()
+                    AddressBook:SetWaypoint(fav.entry)
+                end
+                UIDropDownMenu_AddButton(info, level)
+            end
+        end
+
+        -- Separator + cancel
+        info = UIDropDownMenu_CreateInfo()
+        info.text = ""
+        info.disabled = true
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+
+        info = UIDropDownMenu_CreateInfo()
+        info.text = "Cancel"
+        info.notCheckable = true
+        UIDropDownMenu_AddButton(info, level)
+    end
+
+    UIDropDownMenu_Initialize(favMenuFrame, InitMenu, "MENU")
+    ToggleDropDownMenu(1, nil, favMenuFrame, "cursor", 0, 0)
+end
+
 function AddressBook:InitMinimapButton()
     local LDB = LibStub and LibStub("LibDataBroker-1.1", true)
     local LDBIcon = LibStub and LibStub("LibDBIcon-1.0", true)
@@ -14,14 +66,14 @@ function AddressBook:InitMinimapButton()
             if button == "LeftButton" then
                 AddressBook:ToggleUI()
             elseif button == "RightButton" then
-                AddressBook:SaveHere("Quick Save " .. date("%H:%M:%S"), "Custom", nil)
+                ShowFavoritesMenu()
             end
         end,
         OnTooltipShow = function(tooltip)
             tooltip:AddLine("|cff33bbffAddressBook|r v" .. AddressBook.VERSION)
             tooltip:AddLine(" ")
             tooltip:AddLine("|cffeda55fLeft-click|r to open address book")
-            tooltip:AddLine("|cffeda55fRight-click|r to save current location")
+            tooltip:AddLine("|cffeda55fRight-click|r for favorites")
             if AddressBook:HasTomTom() then
                 tooltip:AddLine("|cff00ff00TomTom detected|r")
             else
