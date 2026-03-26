@@ -4,6 +4,7 @@
 ## Author: Breakbone - Dreamscythe
 ## Version: 1.2.0
 ## X-License: All Rights Reserved
+## X-Curse-Project-ID: 1494941
 ## OptionalDeps: TomTom
 ## SavedVariables: AddressBookDB
 ## SavedVariablesPerCharacter: AddressBookCharDB
