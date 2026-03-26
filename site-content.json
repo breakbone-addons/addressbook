@@ -1,0 +1,51 @@
+{
+  "id": "addressbook",
+  "name": "AddressBook",
+  "tagline": "NPC & location finder for TBC Anniversary with TomTom integration",
+  "description": "Find any NPC in Azeroth and Outland. Browse 4,300+ quest givers, trainers, flight masters, innkeepers, and vendors organized by category, or search by name and zone. Set TomTom waypoints with a single click and record your own custom locations.",
+  "logo": "art/logo-v1.svg",
+  "reverse": true,
+  "features": [
+    {
+      "title": "4,300+ Locations",
+      "description": "Pre-populated database of quest givers, trainers, flight masters, innkeepers, vendors, and more."
+    },
+    {
+      "title": "Category Browser",
+      "description": "Organized tree of NPC types with continent and zone filtering. Auto-detects your current zone."
+    },
+    {
+      "title": "Search",
+      "description": "Search across all categories by NPC name, zone, or description."
+    },
+    {
+      "title": "TomTom Integration",
+      "description": "One-click waypoint navigation to any NPC location with TomTom support."
+    },
+    {
+      "title": "Custom Entries",
+      "description": "Record your own locations with /ab record and manage favorites."
+    },
+    {
+      "title": "Faction-Aware",
+      "description": "Filters results to show only NPCs available to your faction."
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "screenshots/main.png",
+      "alt": "AddressBook main window showing NPC categories and search",
+      "caption": "Browse and search 4,300+ NPCs across Azeroth and Outland"
+    }
+  ],
+  "links": [
+    {
+      "label": "GitHub",
+      "href": "https://github.com/breakbone-addons/addressbook"
+    },
+    {
+      "label": "CurseForge",
+      "href": "https://www.curseforge.com/wow/addons/addressbook"
+    }
+  ]
+}

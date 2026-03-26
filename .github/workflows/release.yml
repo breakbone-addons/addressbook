@@ -18,3 +18,10 @@ jobs:
         env:
           CF_API_KEY: ${{ secrets.CF_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Trigger site rebuild
+        if: success()
+        run: |
+          gh api repos/breakbone-addons/breakbone-addons-site/dispatches \
+            -f event_type=addon-release
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}

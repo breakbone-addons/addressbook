@@ -1,0 +1,23 @@
+name: Trigger Site Update on Docs Change
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'site-content.json'
+      - 'art/**'
+      - 'screenshots/**'
+      - 'README.md'
+      - 'CurseForge.md'
+      - 'CHANGELOG.md'
+
+jobs:
+  notify-site:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger site rebuild
+        run: |
+          gh api repos/breakbone-addons/breakbone-addons-site/dispatches \
+            -f event_type=addon-docs-update
+        env:
+          GH_TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
