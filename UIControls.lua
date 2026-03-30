@@ -46,7 +46,7 @@ function AddressBook:GetPooledRow(parent)
         row._selected = selected
 
         -- Name text
-        local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local nameText = row:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
         nameText:SetPoint("LEFT", row, "LEFT", 4, 0)
         nameText:SetPoint("RIGHT", row, "LEFT", 164, 0)
         nameText:SetJustifyH("LEFT")
@@ -55,7 +55,7 @@ function AddressBook:GetPooledRow(parent)
         row._nameText = nameText
 
         -- Zone text
-        local zoneText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local zoneText = row:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
         zoneText:SetPoint("LEFT", row, "LEFT", 168, 0)
         zoneText:SetPoint("RIGHT", row, "LEFT", 278, 0)
         zoneText:SetJustifyH("LEFT")
@@ -65,7 +65,7 @@ function AddressBook:GetPooledRow(parent)
         row._zoneText = zoneText
 
         -- Note text
-        local noteText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local noteText = row:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
         noteText:SetPoint("LEFT", row, "LEFT", 282, 0)
         noteText:SetPoint("RIGHT", row, "RIGHT", -4, 0)
         noteText:SetJustifyH("LEFT")
@@ -75,7 +75,7 @@ function AddressBook:GetPooledRow(parent)
         row._noteText = noteText
 
         -- Custom indicator
-        local customIcon = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local customIcon = row:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
         customIcon:SetPoint("RIGHT", row, "RIGHT", -4, 0)
         customIcon:SetText("")
         customIcon:SetTextColor(UI.COLOR_CUSTOM.r, UI.COLOR_CUSTOM.g, UI.COLOR_CUSTOM.b)
@@ -141,7 +141,7 @@ function AddressBook:CreateCategoryButton(parent, text, level, isExpanded, noArr
     toggleIcon:SetPoint("LEFT", btn, "LEFT", indent, 0)
     btn._toggleIcon = toggleIcon
 
-    local label = btn:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local label = btn:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     label:SetPoint("LEFT", toggleIcon, "RIGHT", 2, 0)
     label:SetPoint("RIGHT", btn, "RIGHT", -2, 0)
     label:SetJustifyH("LEFT")

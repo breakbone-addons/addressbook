@@ -3,6 +3,29 @@ AddressBook = AddressBook or {}
 AddressBook.VERSION = "1.0.0"
 AddressBook.ADDON_NAME = "AddressBook"
 AddressBook.activeWaypoint = nil
+
+-- Fixed-size fonts so UI layout doesn't break with user font scaling
+local FONT_FILE = "Fonts\\FRIZQT__.TTF"
+
+local fontTitle = CreateFont("AddressBookFontTitle")
+fontTitle:SetFont(FONT_FILE, 13, "")
+fontTitle:SetTextColor(1, 0.82, 0)
+
+local fontNormal = CreateFont("AddressBookFontNormal")
+fontNormal:SetFont(FONT_FILE, 11, "")
+fontNormal:SetTextColor(1, 0.82, 0)
+
+local fontSmall = CreateFont("AddressBookFontSmall")
+fontSmall:SetFont(FONT_FILE, 10, "")
+fontSmall:SetTextColor(1, 0.82, 0)
+
+local fontHighlight = CreateFont("AddressBookFontHighlight")
+fontHighlight:SetFont(FONT_FILE, 10, "")
+fontHighlight:SetTextColor(1, 1, 1)
+
+local fontWhite = CreateFont("AddressBookFontWhite")
+fontWhite:SetFont(FONT_FILE, 11, "")
+fontWhite:SetTextColor(1, 1, 1)
 AddressBook.selectedEntry = nil
 AddressBook.mainFrame = nil
 

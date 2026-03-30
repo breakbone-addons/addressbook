@@ -60,7 +60,7 @@ function AddressBook:CreateMainFrame()
     titleBar:SetSize(220, 64)
     titleBar:SetPoint("TOP", 0, 12)
 
-    local title = frame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local title = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontTitle")
     title:SetPoint("TOP", titleBar, "TOP", 0, -14)
     title:SetText("AddressBook")
 
@@ -69,7 +69,7 @@ function AddressBook:CreateMainFrame()
     closeBtn:SetPoint("TOPRIGHT", frame, "TOPRIGHT", -4, -4)
 
     -- TomTom status indicator (left of close)
-    local tomtomStatus = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local tomtomStatus = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     tomtomStatus:SetPoint("TOPRIGHT", closeBtn, "TOPLEFT", -8, -8)
     if AddressBook:HasTomTom() then
         tomtomStatus:SetText("|cff00ff00TomTom|r")
@@ -82,7 +82,7 @@ function AddressBook:CreateMainFrame()
     -------------------------------------------------------------------
     local row1Y = -UI.HEADER_HEIGHT - 4
 
-    local contLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local contLabel = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     contLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + 10, row1Y - 5)
     contLabel:SetText("Continent:")
     contLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
@@ -97,7 +97,7 @@ function AddressBook:CreateMainFrame()
     contAutoCheck:SetSize(20, 20)
     contAutoCheck:SetChecked(true)
     _G["AddressBookContAutoFilterText"]:SetText("Auto")
-    _G["AddressBookContAutoFilterText"]:SetFontObject("GameFontNormalSmall")
+    _G["AddressBookContAutoFilterText"]:SetFontObject("AddressBookFontSmall")
 
     -- My Faction checkbox (right of continent Auto)
     local factionCheck = CreateFrame("CheckButton", "AddressBookFactionFilter", frame, "UICheckButtonTemplate")
@@ -105,7 +105,7 @@ function AddressBook:CreateMainFrame()
     factionCheck:SetSize(20, 20)
     factionCheck:SetChecked(AddressBookDB and AddressBookDB.settings and AddressBookDB.settings.showFactionOnly)
     _G["AddressBookFactionFilterText"]:SetText("My Faction")
-    _G["AddressBookFactionFilterText"]:SetFontObject("GameFontNormalSmall")
+    _G["AddressBookFactionFilterText"]:SetFontObject("AddressBookFontSmall")
     factionCheck:SetScript("OnClick", function(self)
         if AddressBookDB and AddressBookDB.settings then
             AddressBookDB.settings.showFactionOnly = self:GetChecked()
@@ -114,7 +114,7 @@ function AddressBook:CreateMainFrame()
     end)
 
     -- Search label + box + count (right side of row 1)
-    local searchLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local searchLabel = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     searchLabel:SetPoint("LEFT", factionCheck, "RIGHT", 80, 0)
     searchLabel:SetText("Search:")
     searchLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
@@ -131,7 +131,7 @@ function AddressBook:CreateMainFrame()
     frame._searchBox = searchBox
 
     -- Entry count (right side, same row as TomTom status)
-    local countText = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local countText = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     countText:SetPoint("RIGHT", tomtomStatus, "LEFT", -12, 0)
     countText:SetTextColor(0.5, 0.5, 0.5)
     frame._countText = countText
@@ -197,7 +197,7 @@ function AddressBook:CreateMainFrame()
     -------------------------------------------------------------------
     local row2Y = row1Y - 26
 
-    local zoneLabel = frame:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local zoneLabel = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     zoneLabel:SetPoint("TOPLEFT", frame, "TOPLEFT", UI.PADDING + 10, row2Y - 5)
     zoneLabel:SetText("Zone:")
     zoneLabel:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
@@ -214,7 +214,7 @@ function AddressBook:CreateMainFrame()
     zoneAutoCheck:SetSize(20, 20)
     zoneAutoCheck:SetChecked(false)
     _G["AddressBookZoneAutoFilterText"]:SetText("Auto")
-    _G["AddressBookZoneAutoFilterText"]:SetFontObject("GameFontNormalSmall")
+    _G["AddressBookZoneAutoFilterText"]:SetFontObject("AddressBookFontSmall")
     frame._zoneAutoCheck = zoneAutoCheck
 
     local function ZoneDropdown_Init(self, level)
@@ -346,17 +346,17 @@ function AddressBook:CreateMainFrame()
     listPanel:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
 
     -- Column headers
-    local headerName = listPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local headerName = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     headerName:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 8, -4)
     headerName:SetText("Name")
     headerName:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
 
-    local headerZone = listPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local headerZone = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     headerZone:SetPoint("LEFT", headerName, "LEFT", 164, 0)
     headerZone:SetText("Zone")
     headerZone:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
 
-    local headerNote = listPanel:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local headerNote = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     headerNote:SetPoint("LEFT", headerName, "LEFT", 278, 0)
     headerNote:SetText("Note")
     headerNote:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
@@ -886,7 +886,7 @@ local function CreateEditDialog()
     tinsert(UISpecialFrames, "AddressBookEditDialog")
 
     -- Title
-    local title = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+    local title = dlg:CreateFontString(nil, "OVERLAY", "AddressBookFontTitle")
     title:SetPoint("TOP", 0, -16)
     dlg._title = title
 
@@ -896,7 +896,7 @@ local function CreateEditDialog()
 
     -- Helper: create a labeled input
     local function MakeField(parent, labelText, y, editWidth)
-        local lbl = parent:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        local lbl = parent:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
         lbl:SetPoint("TOPLEFT", parent, "TOPLEFT", 20, y)
         lbl:SetWidth(labelWidth)
         lbl:SetJustifyH("RIGHT")
@@ -915,7 +915,7 @@ local function CreateEditDialog()
     yPos = yPos - 28
 
     -- Coordinates row (X, Y + Current Location button)
-    local coordLabel = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local coordLabel = dlg:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     coordLabel:SetPoint("TOPLEFT", dlg, "TOPLEFT", 20, yPos)
     coordLabel:SetWidth(labelWidth)
     coordLabel:SetJustifyH("RIGHT")
@@ -928,7 +928,7 @@ local function CreateEditDialog()
     xBox:SetNumeric(false)
     dlg._xBox = xBox
 
-    local commaLabel = dlg:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+    local commaLabel = dlg:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
     commaLabel:SetPoint("LEFT", xBox, "RIGHT", 2, 0)
     commaLabel:SetText(",")
 
