@@ -31,7 +31,8 @@ jobs:
           find . -exec touch -t "$(date +%Y%m%d%H%M.%S)" {} +
           ZIPNAME="AddressBook-v${VERSION}-bcc.zip"
           zip -r "../$ZIPNAME" .
-          cd .. && rm -rf _tmp && rm -f "$ORIG_ZIP"
+          cd .. && rm -rf _tmp
+          [ "$ORIG_ZIP" != "$ZIPNAME" ] && rm -f "$ORIG_ZIP" || true
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
