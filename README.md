@@ -6,7 +6,7 @@
 
 <p align="center">
   A World of Warcraft TBC Anniversary addon that helps you find NPCs and locations with one-click TomTom waypoint navigation.<br/>
-  4,300+ pre-populated locations with continent/zone filtering, search, favorites, and custom entries.
+  5,800+ pre-populated locations with continent/zone filtering, search, favorites, and custom entries.
 </p>
 
 <p align="center">
@@ -21,7 +21,7 @@ Find any NPC by category, continent, and zone. Select an entry and set a TomTom 
 
 <img src="screenshots/main.png" alt="AddressBook Main Window" width="600"/>
 
-- 4,300+ entries: quest givers, trainers, flight masters, innkeepers, vendors, banks, and more
+- 5,800+ entries: quest givers, trainers, vendors, flight masters, innkeepers, banks, instance entrances, and more
 - Continent and zone dropdowns with auto-detect
 - Category tree: Quests, Trainers, Transportation, Services, PvP, Custom
 - Double-click any entry to set a waypoint instantly

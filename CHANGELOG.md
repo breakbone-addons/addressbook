@@ -1,5 +1,13 @@
 # AddressBook Changelog
 
+## 1.3.0
+- Added 1,360 vendor NPCs across 13 subcategories (food, reagents, profession supplies, weapons, armor, and more)
+- Added 50-test suite covering data validation, favorites, custom entries, map resolution, and TomTom integration
+- Fixed font scaling: UI layout is now stable regardless of user font size settings
+- Fixed 11 duplicate vendor entries caught by test suite
+- Zone dropdown now filters by selected continent
+- Total database: 5,800+ locations
+
 ## 1.2.0
 - Added dungeon and raid instance entrances (42 dungeons, 15 raids covering Classic and TBC)
 - Added Nearest button to highlight the closest location in the current list

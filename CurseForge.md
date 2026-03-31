@@ -4,7 +4,7 @@
 
 ### Browse & Navigate
 
-Find any NPC by category, continent, and zone. Over 4,300 pre-populated locations including quest givers, class trainers, profession trainers, flight masters, innkeepers, repair vendors, banks, auction houses, battlemasters, and stable masters. Select an entry and set a TomTom waypoint with one click.
+Find any NPC by category, continent, and zone. Over 5,800 pre-populated locations including quest givers, class trainers, profession trainers, 1,360+ vendors, flight masters, innkeepers, repair vendors, banks, auction houses, dungeon and raid entrances, battlemasters, and stable masters. Select an entry and set a TomTom waypoint with one click.
 
 <img src="https://breakbone-addons.com/images/addressbook-main.png" alt="AddressBook Main Window" width="500"/>
 

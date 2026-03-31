@@ -230,9 +230,18 @@ function AddressBook:CreateMainFrame()
         end
         UIDropDownMenu_AddButton(info, level)
 
+        -- Resolve the effective continent for zone filtering
+        local effectiveContinent = selectedContinent
+        if effectiveContinent == "Auto" then
+            local rZone = AddressBook:GetCurrentZoneName()
+            if rZone then
+                effectiveContinent = AddressBook:GetContinentForZone(rZone)
+            end
+        end
+
         local zones
-        if selectedContinent and selectedContinent ~= "Auto" then
-            zones = AddressBook:GetZonesForContinent(selectedContinent)
+        if effectiveContinent then
+            zones = AddressBook:GetZonesForContinent(effectiveContinent)
         else
             zones = AddressBook:GetZonesWithEntries()
         end
