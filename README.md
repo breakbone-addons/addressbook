@@ -5,8 +5,8 @@
 <h1 align="center">AddressBook</h1>
 
 <p align="center">
-  A World of Warcraft TBC Anniversary addon that helps you find NPCs and locations with one-click TomTom waypoint navigation.<br/>
-  5,800+ pre-populated locations with continent/zone filtering, search, favorites, and custom entries.
+  A World of Warcraft TBC Anniversary addon that helps you find NPCs, creatures, and locations with one-click TomTom waypoint navigation.<br/>
+  13,600+ pre-populated locations with 83,000+ spawn points. Continent/zone filtering, search, favorites, and custom entries.
 </p>
 
 <p align="center">
@@ -21,15 +21,25 @@ Find any NPC by category, continent, and zone. Select an entry and set a TomTom 
 
 <img src="screenshots/main.png" alt="AddressBook Main Window" width="600"/>
 
-- 5,800+ entries: quest givers, trainers, vendors, flight masters, innkeepers, banks, instance entrances, and more
+- 13,600+ entries: quest givers, trainers, vendors, flight masters, innkeepers, banks, instance entrances, 7,500+ creatures, 425 critters, and more
+- Sortable columns — click Name, Zone, or Note headers to sort
 - Continent and zone dropdowns with auto-detect
-- Category tree: Quests, Trainers, Transportation, Services, PvP, Custom
+- Category tree: Quests, Instances, Trainers, Vendors, Transportation, Services, PvP, Creatures, Critters, Custom
 - Double-click any entry to set a waypoint instantly
-- Right-click for context menu (set waypoint, favorite, edit, delete)
+- Right-click for context menu (set waypoint, set all waypoints, favorite, edit, delete)
 
 ## Favorites
 
 Mark any entry as a favorite from the right-click menu. Favorites appear in green and are collected in a dedicated Favorites category at the top of the tree for quick access. Favorites persist across sessions.
+
+## Creatures & Critters
+
+Browse 7,500+ creatures and 425 critters across 110 zones (outdoor and instances). Each creature stores all known spawn points. Right-click and "Set All Waypoints" to light up the map with every spawn location. Instance creatures point to the dungeon/raid entrance when you're in the open world.
+
+- All spawn points stored per creature (83,000+ total)
+- Set All Waypoints places a TomTom pin at every spawn
+- Instance creatures auto-redirect to entrance from the open world
+- Creature data loads on demand and unloads when window closes to save memory
 
 ## TomTom Integration
 
@@ -38,10 +48,29 @@ Click "Set Waypoint" or double-click any entry to create a TomTom waypoint with 
 - One-click waypoint creation from any entry
 - Automatic waypoint clearing when setting a new one
 - Fallback coordinate display without TomTom
+- Waypoints display "From: AddressBook" in TomTom tooltips
 
 ## Search
 
-Search across all categories by NPC name, zone, or description. Results update as you type, regardless of which category is selected.
+Search across all categories by NPC name, zone, or description. Results update as you type, regardless of which category is selected. Bidirectional matching handles plurals and partial names (e.g., "Voidshriekers" finds "Voidshrieker").
+
+## Addon API
+
+Other addons can call into AddressBook to look up NPCs and set waypoints:
+
+```lua
+-- Set waypoint to nearest spawn
+AddressBook.API:WaypointTo("Voidshrieker", "Netherstorm")
+
+-- Show all spawn points on the map
+AddressBook.API:ShowSpawns("Voidshrieker", "Netherstorm")
+
+-- Full lookup with options
+local results, definitive = AddressBook.API:Lookup("Voidshrieker", {
+    zone = "Netherstorm",
+    action = "all",  -- "none", "nearest", or "all"
+})
+```
 
 ## Custom Locations
 

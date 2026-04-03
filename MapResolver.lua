@@ -103,6 +103,95 @@ function AddressBook:BuildContinentZoneMap()
         end
     end
 
+    -- Map instance zones to the continent of their entrance
+    if AddressBook.LocationDB and AddressBook.LocationDB["Instances"] then
+        for _, subcategory in pairs(AddressBook.LocationDB["Instances"]) do
+            for _, entry in ipairs(subcategory) do
+                local instanceName = entry.name
+                local entranceZone = entry.zone
+                local cont = zoneToContinent[entranceZone]
+                if cont and instanceName and not zoneToContinent[instanceName] then
+                    zoneToContinent[instanceName] = cont
+                    if not continentZones[cont] then
+                        continentZones[cont] = {}
+                    end
+                    continentZones[cont][instanceName] = true
+                end
+            end
+        end
+    end
+
+    -- Additional instance-to-continent mappings for MobData zone names
+    -- that don't exactly match the Instances category names
+    local instanceContinentOverrides = {
+        -- Classic - Eastern Kingdoms
+        ["Blackrock Depths"] = "Eastern Kingdoms",
+        ["Blackrock Spire"] = "Eastern Kingdoms",
+        ["Scarlet Monastery"] = "Eastern Kingdoms",
+        ["Stratholme"] = "Eastern Kingdoms",
+        ["Scholomance"] = "Eastern Kingdoms",
+        ["Uldaman"] = "Eastern Kingdoms",
+        ["Gnomeregan"] = "Eastern Kingdoms",
+        ["The Deadmines"] = "Eastern Kingdoms",
+        ["The Stockade"] = "Eastern Kingdoms",
+        ["Shadowfang Keep"] = "Eastern Kingdoms",
+        ["Sunken Temple"] = "Eastern Kingdoms",
+        ["Zul'Gurub"] = "Eastern Kingdoms",
+        ["Blackwing Lair"] = "Eastern Kingdoms",
+        ["Molten Core"] = "Eastern Kingdoms",
+        ["Naxxramas"] = "Eastern Kingdoms",
+        -- Classic - Kalimdor
+        ["Wailing Caverns"] = "Kalimdor",
+        ["Razorfen Kraul"] = "Kalimdor",
+        ["Razorfen Downs"] = "Kalimdor",
+        ["Maraudon"] = "Kalimdor",
+        ["Dire Maul"] = "Kalimdor",
+        ["Zul'Farrak"] = "Kalimdor",
+        ["Blackfathom Deeps"] = "Kalimdor",
+        ["Ragefire Chasm"] = "Kalimdor",
+        ["Onyxia's Lair"] = "Kalimdor",
+        ["Ahn'Qiraj"] = "Kalimdor",
+        ["Ruins of Ahn'Qiraj"] = "Kalimdor",
+        ["Hyjal Summit"] = "Kalimdor",
+        -- TBC - Outland
+        ["Hellfire Ramparts"] = "Outland",
+        ["The Blood Furnace"] = "Outland",
+        ["The Shattered Halls"] = "Outland",
+        ["The Slave Pens"] = "Outland",
+        ["The Underbog"] = "Outland",
+        ["The Steamvault"] = "Outland",
+        ["Mana-Tombs"] = "Outland",
+        ["Auchenai Crypts"] = "Outland",
+        ["Sethekk Halls"] = "Outland",
+        ["Shadow Labyrinth"] = "Outland",
+        ["The Mechanar"] = "Outland",
+        ["The Botanica"] = "Outland",
+        ["The Arcatraz"] = "Outland",
+        ["Magisters' Terrace"] = "Outland",
+        ["Karazhan"] = "Eastern Kingdoms",
+        ["Serpentshrine Cavern"] = "Outland",
+        ["Black Temple"] = "Outland",
+        ["Zul'Aman"] = "Eastern Kingdoms",
+        ["Sunwell Plateau"] = "Eastern Kingdoms",
+        ["Magtheridon's Lair"] = "Outland",
+        -- PvP
+        ["Alterac Valley"] = "Eastern Kingdoms",
+        ["Arathi Basin"] = "Eastern Kingdoms",
+        ["Warsong Gulch"] = "Kalimdor",
+        -- Caverns of Time instances
+        ["Old Hillsbrad Foothills"] = "Kalimdor",
+        ["The Black Morass"] = "Kalimdor",
+    }
+    for instanceName, cont in pairs(instanceContinentOverrides) do
+        if not zoneToContinent[instanceName] then
+            zoneToContinent[instanceName] = cont
+            if not continentZones[cont] then
+                continentZones[cont] = {}
+            end
+            continentZones[cont][instanceName] = true
+        end
+    end
+
     -- Build sorted continent list
     for name in pairs(continentZones) do
         continentList[#continentList + 1] = name

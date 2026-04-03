@@ -2,7 +2,7 @@
 ## Title: AddressBook
 ## Notes: Location and NPC address book with TomTom waypoint integration.
 ## Author: Breakbone - Dreamscythe
-## Version: 1.3.1
+## Version: 1.4.0
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1494941
 ## OptionalDeps: TomTom
@@ -16,8 +16,10 @@ Libs\LibDBIcon-1.0\LibDBIcon-1.0.lua
 
 MapResolver.lua
 Data.lua
+MobData.lua
 UserData.lua
 TomTomIntegration.lua
+API.lua
 Core.lua
 MinimapButton.lua
 UIControls.lua

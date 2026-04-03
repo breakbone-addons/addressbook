@@ -1,28 +1,36 @@
-## AddressBook helps you find NPCs and locations across Azeroth and Outland with one-click TomTom waypoint navigation. Built for TBC Anniversary.
+## AddressBook helps you find NPCs, creatures, and locations across Azeroth and Outland with one-click TomTom waypoint navigation. Built for TBC Anniversary.
 
 ## Features
 
 ### Browse & Navigate
 
-Find any NPC by category, continent, and zone. Over 5,800 pre-populated locations including quest givers, class trainers, profession trainers, 1,360+ vendors, flight masters, innkeepers, repair vendors, banks, auction houses, dungeon and raid entrances, battlemasters, and stable masters. Select an entry and set a TomTom waypoint with one click.
+Find any NPC or creature by category, continent, and zone. Over 13,600 pre-populated locations with 83,000+ spawn points. Browse quest givers, trainers, vendors, flight masters, innkeepers, banks, instance entrances, 7,500+ creatures, 425 critters, and more. Sortable columns let you organize results by name, zone, or note.
 
 <img src="https://breakbone-addons.com/images/addressbook-main.png" alt="AddressBook Main Window" width="500"/>
 
+### Creatures & Spawn Points
+
+Browse every creature across 110 zones (outdoor and instances). Each creature stores all known spawn points — right-click and "Set All Waypoints" to place a TomTom pin at every spawn location. Instance creatures point to the dungeon entrance when you're in the open world. Creature data loads on demand and unloads when the window closes to save memory.
+
 ### TomTom Integration
 
-Double-click any entry to create a TomTom waypoint with the crazy arrow pointing you directly to your destination. Works seamlessly — if TomTom isn't installed, coordinates are printed to chat instead.
+Double-click any entry to create a TomTom waypoint with the crazy arrow pointing you directly to your destination. Works seamlessly — if TomTom isn't installed, coordinates are printed to chat instead. Waypoints display "From: AddressBook" in TomTom tooltips.
 
 ### Favorites
 
-Right-click any entry and select "Add Favorite" to bookmark it. Favorites appear in green and are collected in a dedicated Favorites category at the top of the tree for quick access. Persists across sessions.
+Right-click any entry and select "Add Favorite" to bookmark it. Favorites appear in green and are collected in a dedicated Favorites category at the top of the tree for quick access. Right-click the minimap button for a quick favorites menu. Persists across sessions.
 
 ### Continent & Zone Filtering
 
-Narrow results with continent and zone dropdowns that work alongside the category tree. "Auto" mode detects your current zone and filters automatically — the list always shows what's relevant to where you are.
+Narrow results with continent and zone dropdowns that work alongside the category tree. "Auto" mode detects your current zone and filters automatically — the list always shows what's relevant to where you are. Instance zones are mapped to their real-world continents.
 
 ### Search Everything
 
-Search across all categories by NPC name, zone, or description. Results update as you type.
+Search across all categories by NPC name, zone, or description. Results update as you type. Bidirectional matching handles plurals and partial names.
+
+### Addon API
+
+Other addons can call into AddressBook to look up NPCs and set waypoints programmatically. Supports definitive matching with automatic waypoint creation and ambiguous search with UI display.
 
 ### Custom Locations
 

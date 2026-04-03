@@ -1,5 +1,20 @@
 # AddressBook Changelog
 
+## 1.4.0
+- Added 7,500+ creatures and 425 critters with all spawn points across 110 zones (outdoor + instances)
+- Added public API for other addons: Lookup, WaypointTo, ShowSpawns, Search
+- Added sortable column headers (click Name, Zone, or Note to sort)
+- Added bidirectional search matching (handles plurals like "Voidshriekers" finding "Voidshrieker")
+- Instance creatures show entrance waypoints when outside, "inside instance" message when inside
+- Instance zones mapped to correct continents for filtering
+- Creature/critter data loads on demand and unloads when window closes to save memory
+- Removed junk entries: triggers, invisible stalkers, quest credit markers
+- Right-click creatures with multiple spawns to "Set All Waypoints" on the map
+- TomTom waypoints now show "From: AddressBook"
+- Clicking a category clears the search box
+- Total database: 13,600+ locations with 83,000+ spawn points
+- Test suite expanded to 61 tests
+
 ## 1.3.0
 - Added 1,360 vendor NPCs across 13 subcategories (food, reagents, profession supplies, weapons, armor, and more)
 - Added 50-test suite covering data validation, favorites, custom entries, map resolution, and TomTom integration

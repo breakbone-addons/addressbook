@@ -205,6 +205,17 @@ function AddressBook:ShowEntryContextMenu(row)
         end
         UIDropDownMenu_AddButton(info, level)
 
+        -- Set All Waypoints (for entries with multiple spawns)
+        if data.entry.spawns and #data.entry.spawns > 1 then
+            info = UIDropDownMenu_CreateInfo()
+            info.text = "Set All Waypoints (" .. #data.entry.spawns .. ")"
+            info.notCheckable = true
+            info.func = function()
+                AddressBook:SetAllWaypoints(data.entry)
+            end
+            UIDropDownMenu_AddButton(info, level)
+        end
+
         -- Favorite toggle
         info = UIDropDownMenu_CreateInfo()
         local isFav = AddressBook:IsFavorite(data.entry)

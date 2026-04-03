@@ -14,6 +14,8 @@ local searchText = ""
 local searchTimer = nil
 local selectedContinent = "Auto"  -- nil=All, "Auto"=auto-detect, or continent name
 local selectedZone = nil          -- nil=All, "Auto"=auto-detect, or zone name
+local sortColumn = "name"         -- "name", "zone", or "note"
+local sortAscending = true
 
 -- Forward declarations
 local RefreshCategoryList, RefreshEntryList, UpdateWaypointButton
@@ -51,8 +53,21 @@ function AddressBook:CreateMainFrame()
         end
     end)
 
-    -- Close on ESC
-    tinsert(UISpecialFrames, "AddressBookMainFrame")
+    -- Close on ESC without using UISpecialFrames (which closes on map open)
+    frame:SetPropagateKeyboardInput(true)
+    frame:SetScript("OnKeyDown", function(self, key)
+        if key == "ESCAPE" and self:IsShown() then
+            self:SetPropagateKeyboardInput(false)
+            self:Hide()
+        else
+            self:SetPropagateKeyboardInput(true)
+        end
+    end)
+
+    -- Unload MobDB when window hides (ESC, close button, etc.)
+    frame:SetScript("OnHide", function()
+        AddressBook:UnloadMobDB()
+    end)
 
     -- Title bar (standard WoW dialog header)
     local titleBar = frame:CreateTexture(nil, "ARTWORK")
@@ -132,7 +147,7 @@ function AddressBook:CreateMainFrame()
 
     -- Entry count (right side, same row as TomTom status)
     local countText = frame:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
-    countText:SetPoint("RIGHT", tomtomStatus, "LEFT", -12, 0)
+    countText:SetPoint("TOPRIGHT", tomtomStatus, "BOTTOMRIGHT", 0, -2)
     countText:SetTextColor(0.5, 0.5, 0.5)
     frame._countText = countText
 
@@ -153,6 +168,7 @@ function AddressBook:CreateMainFrame()
             UIDropDownMenu_SetText(continentDropdown, "All")
             UIDropDownMenu_SetText(frame._zoneDropdown, "All")
             if frame._zoneAutoCheck then frame._zoneAutoCheck:SetChecked(false) end
+            RefreshCategoryList()
             RefreshEntryList()
         end
         UIDropDownMenu_AddButton(info, level)
@@ -169,6 +185,7 @@ function AddressBook:CreateMainFrame()
                 UIDropDownMenu_SetText(continentDropdown, name)
                 UIDropDownMenu_SetText(frame._zoneDropdown, "All")
                 if frame._zoneAutoCheck then frame._zoneAutoCheck:SetChecked(false) end
+                RefreshCategoryList()
                 RefreshEntryList()
             end
             UIDropDownMenu_AddButton(info, level)
@@ -179,7 +196,6 @@ function AddressBook:CreateMainFrame()
     contAutoCheck:SetScript("OnClick", function(self)
         if self:GetChecked() then
             selectedContinent = "Auto"
-            -- Resolve and select current continent in dropdown
             local rZone = AddressBook:GetCurrentZoneName()
             local rCont = rZone and AddressBook:GetContinentForZone(rZone)
             UIDropDownMenu_SetText(continentDropdown, rCont or "All")
@@ -187,6 +203,7 @@ function AddressBook:CreateMainFrame()
             selectedContinent = nil
             UIDropDownMenu_SetText(continentDropdown, "All")
         end
+        RefreshCategoryList()
         RefreshEntryList()
     end)
 
@@ -226,6 +243,7 @@ function AddressBook:CreateMainFrame()
             selectedZone = nil
             zoneAutoCheck:SetChecked(false)
             UIDropDownMenu_SetText(zoneDropdown, "All")
+            RefreshCategoryList()
             RefreshEntryList()
         end
         UIDropDownMenu_AddButton(info, level)
@@ -261,6 +279,7 @@ function AddressBook:CreateMainFrame()
                         UIDropDownMenu_SetText(continentDropdown, cont)
                     end
                 end
+                RefreshCategoryList()
                 RefreshEntryList()
             end
             UIDropDownMenu_AddButton(info, level)
@@ -273,7 +292,6 @@ function AddressBook:CreateMainFrame()
             selectedZone = "Auto"
             local rZone = AddressBook:GetCurrentZoneName()
             UIDropDownMenu_SetText(zoneDropdown, rZone or "All")
-            -- Also auto the continent if not already
             if not contAutoCheck:GetChecked() then
                 contAutoCheck:SetChecked(true)
                 selectedContinent = "Auto"
@@ -284,6 +302,7 @@ function AddressBook:CreateMainFrame()
             selectedZone = nil
             UIDropDownMenu_SetText(zoneDropdown, "All")
         end
+        RefreshCategoryList()
         RefreshEntryList()
     end)
 
@@ -297,8 +316,8 @@ function AddressBook:CreateMainFrame()
     local clearBtn = AddressBook:CreateButton(frame, "Clear WP", 55, 20)
     clearBtn:SetPoint("RIGHT", addBtn, "LEFT", -4, 0)
     clearBtn:SetScript("OnClick", function()
-        AddressBook:ClearWaypoint()
-        AddressBook:Print("Waypoint cleared.")
+        AddressBook:ClearAllWaypoints()
+        AddressBook:Print("Waypoint(s) cleared.")
     end)
 
     local waypointBtn = AddressBook:CreateButton(frame, "Set WP", 50, 20)
@@ -354,21 +373,53 @@ function AddressBook:CreateMainFrame()
     })
     listPanel:SetBackdropColor(0.08, 0.08, 0.08, 0.8)
 
-    -- Column headers
-    local headerName = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
-    headerName:SetPoint("TOPLEFT", listPanel, "TOPLEFT", 8, -4)
-    headerName:SetText("Name")
-    headerName:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+    -- Sortable column headers
+    local function UpdateHeaderArrows()
+        local down = "|TInterface\\Buttons\\Arrow-Down-Up:0|t"
+        local up = "|TInterface\\Buttons\\Arrow-Up-Up:0|t"
+        local arrow = sortAscending and up or down
+        frame._headerName:SetText(sortColumn == "name" and ("Name " .. arrow) or "Name")
+        frame._headerZone:SetText(sortColumn == "zone" and ("Zone " .. arrow) or "Zone")
+        frame._headerNote:SetText(sortColumn == "note" and ("Note " .. arrow) or "Note")
+    end
 
-    local headerZone = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
-    headerZone:SetPoint("LEFT", headerName, "LEFT", 164, 0)
-    headerZone:SetText("Zone")
-    headerZone:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+    local function MakeHeaderButton(parent, text, col, xOffset)
+        local btn = CreateFrame("Button", nil, parent)
+        btn:SetHeight(16)
+        btn:SetPoint("TOPLEFT", parent, "TOPLEFT", xOffset, -2)
+        if col == "name" then
+            btn:SetPoint("RIGHT", parent, "LEFT", xOffset + 160, 0)
+        elseif col == "zone" then
+            btn:SetPoint("RIGHT", parent, "LEFT", xOffset + 110, 0)
+        else
+            btn:SetPoint("RIGHT", parent, "RIGHT", -22, 0)
+        end
+        local label = btn:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
+        label:SetPoint("LEFT", btn, "LEFT", 0, 0)
+        label:SetText(text)
+        label:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+        btn:SetScript("OnClick", function()
+            if sortColumn == col then
+                sortAscending = not sortAscending
+            else
+                sortColumn = col
+                sortAscending = true
+            end
+            UpdateHeaderArrows()
+            RefreshEntryList()
+        end)
+        btn:SetScript("OnEnter", function()
+            label:SetTextColor(1, 1, 1)
+        end)
+        btn:SetScript("OnLeave", function()
+            label:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+        end)
+        return label
+    end
 
-    local headerNote = listPanel:CreateFontString(nil, "OVERLAY", "AddressBookFontSmall")
-    headerNote:SetPoint("LEFT", headerName, "LEFT", 278, 0)
-    headerNote:SetText("Note")
-    headerNote:SetTextColor(UI.COLOR_HEADER.r, UI.COLOR_HEADER.g, UI.COLOR_HEADER.b)
+    frame._headerName = MakeHeaderButton(listPanel, "Name |TInterface\\Buttons\\Arrow-Down-Up:0|t", "name", 8)
+    frame._headerZone = MakeHeaderButton(listPanel, "Zone", "zone", 172)
+    frame._headerNote = MakeHeaderButton(listPanel, "Note", "note", 286)
 
     -- Nearest button (centered over Zone column, same row as other buttons)
     -- Zone header is at listPanel TOPLEFT + (8 + 164) = catPanel right + 4 + 172
@@ -504,14 +555,20 @@ RefreshCategoryList = function()
         catBtn._categoryName = cat.name
         catBtn._isFlat = isFlatCategory
         catBtn:SetScript("OnClick", function(self)
+            -- Clear search when clicking a category
+            if searchText ~= "" then
+                searchText = ""
+                if AddressBook.mainFrame and AddressBook.mainFrame._searchBox then
+                    AddressBook.mainFrame._searchBox:SetText("")
+                end
+            end
+
             if self._isFlat then
-                -- Flat category: select directly, no expand/collapse
                 selectedCategory = self._categoryName
                 selectedSubcategory = nil
             else
                 expandedCategories[self._categoryName] = not expandedCategories[self._categoryName]
                 selectedCategory = self._categoryName
-                -- Select first subcategory when expanding
                 if expandedCategories[self._categoryName] then
                     local subOrder = AddressBook.SubcategoryOrder and AddressBook.SubcategoryOrder[self._categoryName]
                     if subOrder and subOrder[1] then
@@ -521,7 +578,6 @@ RefreshCategoryList = function()
                     end
                 end
             end
-            -- Persist selection
             if AddressBookCharDB then
                 AddressBookCharDB.lastCategory = selectedCategory
                 AddressBookCharDB.lastSubcategory = selectedSubcategory
@@ -538,6 +594,45 @@ RefreshCategoryList = function()
             local subOrder = AddressBook.SubcategoryOrder and AddressBook.SubcategoryOrder[cat.name]
             local subs = subOrder or cat.subcategories
 
+            -- Filter zone-based subcategories (Creatures, Critters) by continent/zone settings
+            if cat.name == "Creatures" or cat.name == "Critters" then
+                -- Resolve effective zone (Auto = player's current zone)
+                local effectiveZone = selectedZone
+                if effectiveZone == "Auto" then
+                    effectiveZone = AddressBook:GetCurrentZoneName()
+                end
+
+                -- Resolve effective continent (Auto = player's current continent)
+                local effectiveCont = selectedContinent
+                if effectiveCont == "Auto" then
+                    local rZone = AddressBook:GetCurrentZoneName()
+                    if rZone then effectiveCont = AddressBook:GetContinentForZone(rZone) end
+                end
+
+                if effectiveZone then
+                    -- Zone filter: show only that zone
+                    local filtered = {}
+                    for _, subName in ipairs(subs) do
+                        if subName == effectiveZone then
+                            filtered[#filtered + 1] = subName
+                        end
+                    end
+                    subs = filtered
+                elseif effectiveCont then
+                    -- Continent filter: show zones in that continent
+                    local allowed = {}
+                    local contZones = AddressBook:GetZonesForContinent(effectiveCont)
+                    for _, z in ipairs(contZones) do allowed[z] = true end
+                    local filtered = {}
+                    for _, subName in ipairs(subs) do
+                        if allowed[subName] then
+                            filtered[#filtered + 1] = subName
+                        end
+                    end
+                    subs = filtered
+                end
+            end
+
             for _, subName in ipairs(subs) do
                 local subBtn = AddressBook:CreateCategoryButton(catChild, subName, 2, false)
                 subBtn:SetPoint("TOPLEFT", catChild, "TOPLEFT", 0, -yOffset)
@@ -551,6 +646,13 @@ RefreshCategoryList = function()
                 subBtn._categoryName = cat.name
                 subBtn._subcategoryName = subName
                 subBtn:SetScript("OnClick", function(self)
+                    -- Clear search when clicking a subcategory
+                    if searchText ~= "" then
+                        searchText = ""
+                        if AddressBook.mainFrame and AddressBook.mainFrame._searchBox then
+                            AddressBook.mainFrame._searchBox:SetText("")
+                        end
+                    end
                     selectedCategory = self._categoryName
                     selectedSubcategory = self._subcategoryName
                     if AddressBookCharDB then
@@ -635,6 +737,28 @@ RefreshEntryList = function()
         entries = filtered
     end
 
+    -- Sort entries by selected column
+    if sortColumn and #entries > 1 then
+        table.sort(entries, function(a, b)
+            local av, bv
+            if sortColumn == "name" then
+                av = strlower(a.entry.name or "")
+                bv = strlower(b.entry.name or "")
+            elseif sortColumn == "zone" then
+                av = strlower(a.entry.zone or "")
+                bv = strlower(b.entry.zone or "")
+            elseif sortColumn == "note" then
+                av = strlower(a.entry.note or "")
+                bv = strlower(b.entry.note or "")
+            end
+            if sortAscending then
+                return av < bv
+            else
+                return av > bv
+            end
+        end)
+    end
+
     local yOffset = 0
     local listWidth = entryChild:GetParent():GetWidth() - 26
 
@@ -696,7 +820,14 @@ RefreshEntryList = function()
                 if d.note then
                     GameTooltip:AddLine(d.note, 0.7, 0.7, 0.7)
                 end
-                GameTooltip:AddLine(format("Coordinates: %.1f, %.1f", d.x, d.y), 0.5, 1.0, 0.5)
+                if d.x and d.y and d.x >= 0 and d.y >= 0 then
+                    GameTooltip:AddLine(format("Coordinates: %.1f, %.1f", d.x, d.y), 0.5, 1.0, 0.5)
+                    if d.spawns and #d.spawns > 1 then
+                        GameTooltip:AddLine(format("|cffffcc00%d spawn points|r", #d.spawns))
+                    end
+                else
+                    GameTooltip:AddLine("Inside " .. (d.zone or "instance"), 0.7, 0.5, 1.0)
+                end
                 if d.faction then
                     local fc = d.faction == "Alliance" and "|cff0070dd" or "|cffb30000"
                     GameTooltip:AddLine(fc .. d.faction .. "|r")
@@ -706,7 +837,11 @@ RefreshEntryList = function()
                 end
                 GameTooltip:AddLine(" ")
                 GameTooltip:AddLine("|cffeda55fClick|r to select  |cffeda55fDouble-click|r to set waypoint", 0.5, 0.5, 0.5)
-                GameTooltip:AddLine("|cffeda55fRight-click|r for options", 0.5, 0.5, 0.5)
+                if d.spawns and #d.spawns > 1 then
+                    GameTooltip:AddLine("|cffeda55fRight-click|r for Set All Waypoints", 0.5, 0.5, 0.5)
+                else
+                    GameTooltip:AddLine("|cffeda55fRight-click|r for options", 0.5, 0.5, 0.5)
+                end
                 GameTooltip:Show()
             end
         end)

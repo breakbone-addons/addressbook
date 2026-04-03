@@ -42,9 +42,11 @@ function MockWoW.reset()
     -- Reload addon source files (non-UI)
     dofile("Core.lua")
     dofile("Data.lua")
+    dofile("MobData.lua")
     dofile("MapResolver.lua")
     dofile("UserData.lua")
     dofile("TomTomIntegration.lua")
+    dofile("API.lua")
 
     -- Initialize saved variables for testing
     AddressBookDB = {
@@ -273,6 +275,7 @@ TomTom = nil
 
 dofile("Core.lua")
 dofile("Data.lua")
+dofile("MobData.lua")
 dofile("MapResolver.lua")
 dofile("UserData.lua")
 dofile("TomTomIntegration.lua")

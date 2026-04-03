@@ -41,11 +41,16 @@ function AddressBook:Search(query)
     local results = {}
     query = strlower(query)
 
+    local function nameMatches(entryName)
+        local nl = strlower(entryName)
+        return nl:find(query, 1, true) or query:find(nl, 1, true)
+    end
+
     local function searchDB(db, isCustom)
         for category, subcats in pairs(db) do
             for subcategory, entries in pairs(subcats) do
                 for i, entry in ipairs(entries) do
-                    if strlower(entry.name):find(query, 1, true)
+                    if nameMatches(entry.name)
                         or (entry.note and strlower(entry.note):find(query, 1, true))
                         or (entry.zone and strlower(entry.zone):find(query, 1, true)) then
                         results[#results + 1] = {
@@ -68,6 +73,64 @@ function AddressBook:Search(query)
         searchDB(AddressBookDB.custom, true)
     end
 
+    -- Search MobDB and CritterDB (load on demand)
+    self:LoadMobDB()
+    self:LoadCritterDB()
+    if self.MobDB then
+        for zoneName, entries in pairs(self.MobDB) do
+            for i, entry in ipairs(entries) do
+                if nameMatches(entry.name)
+                    or (entry.note and strlower(entry.note):find(query, 1, true))
+                    or strlower(zoneName):find(query, 1, true) then
+                    local primaryEntry = {
+                        name = entry.name,
+                        zone = zoneName,
+                        x = entry.spawns[1][1],
+                        y = entry.spawns[1][2],
+                        note = entry.note,
+                        spawns = entry.spawns,
+                    }
+                    results[#results + 1] = {
+                        entry = primaryEntry,
+                        category = "Creatures",
+                        subcategory = zoneName,
+                        index = i,
+                        isCustom = false,
+                        spawnCount = #entry.spawns,
+                    }
+                end
+            end
+        end
+    end
+
+    -- Search CritterDB
+    if self.CritterDB then
+        for zoneName, entries in pairs(self.CritterDB) do
+            for i, entry in ipairs(entries) do
+                if nameMatches(entry.name)
+                    or (entry.note and strlower(entry.note):find(query, 1, true))
+                    or strlower(zoneName):find(query, 1, true) then
+                    local primaryEntry = {
+                        name = entry.name,
+                        zone = zoneName,
+                        x = entry.spawns[1][1],
+                        y = entry.spawns[1][2],
+                        note = entry.note,
+                        spawns = entry.spawns,
+                    }
+                    results[#results + 1] = {
+                        entry = primaryEntry,
+                        category = "Critters",
+                        subcategory = zoneName,
+                        index = i,
+                        isCustom = false,
+                        spawnCount = #entry.spawns,
+                    }
+                end
+            end
+        end
+    end
+
     return results
 end
 
@@ -76,6 +139,39 @@ function AddressBook:GetEntries(category, subcategory)
     local results = {}
     local playerFaction = UnitFactionGroup("player")
     local factionFilter = AddressBookDB and AddressBookDB.settings and AddressBookDB.settings.showFactionOnly
+
+    -- Monsters category uses MobDB (organized by zone)
+    -- Load MobDB/CritterDB on demand
+    if category == "Creatures" and subcategory then self:LoadMobDB() end
+    if category == "Critters" and subcategory then self:LoadCritterDB() end
+
+    -- Handle zone-based categories (Creatures and Critters)
+    local mobSource = (category == "Creatures" and self.MobDB) or (category == "Critters" and self.CritterDB) or nil
+    if mobSource and subcategory then
+        local entries = mobSource[subcategory]
+        if entries then
+            for i, entry in ipairs(entries) do
+                -- MobDB entries have spawns array; use first spawn as primary x,y
+                local primaryEntry = {
+                    name = entry.name,
+                    zone = subcategory,
+                    x = entry.spawns[1][1],
+                    y = entry.spawns[1][2],
+                    note = entry.note,
+                    spawns = entry.spawns,
+                }
+                results[#results + 1] = {
+                    entry = primaryEntry,
+                    category = category,
+                    subcategory = subcategory,
+                    index = i,
+                    isCustom = false,
+                    spawnCount = #entry.spawns,
+                }
+            end
+        end
+        return results
+    end
 
     local function addEntries(db, isCustom)
         local subcats = db[category]
@@ -131,6 +227,32 @@ function AddressBook:GetCategories()
         addFromDB(AddressBookDB.custom)
     end
 
+    -- Add Creatures category (zones as subcategories)
+    if self.BuildMobDB then
+        if not seen["Creatures"] then
+            seen["Creatures"] = {}
+            cats[#cats + 1] = "Creatures"
+        end
+        if self._mobZones then
+            for _, zoneName in ipairs(self._mobZones) do
+                seen["Creatures"][zoneName] = true
+            end
+        end
+    end
+
+    -- Add Critters category (zones as subcategories)
+    if self.BuildCritterDB then
+        if not seen["Critters"] then
+            seen["Critters"] = {}
+            cats[#cats + 1] = "Critters"
+        end
+        if self._critterZones then
+            for _, zoneName in ipairs(self._critterZones) do
+                seen["Critters"][zoneName] = true
+            end
+        end
+    end
+
     table.sort(cats)
 
     local result = {}
@@ -144,6 +266,55 @@ function AddressBook:GetCategories()
     end
 
     return result
+end
+
+-- MobDB load/unload for memory management
+function AddressBook:LoadMobDB()
+    if not self.MobDB and self.BuildMobDB then
+        self.MobDB = self:BuildMobDB()
+        if not self._mobZones then self:BuildMobZoneIndex() end
+    end
+end
+
+function AddressBook:LoadCritterDB()
+    if not self.CritterDB and self.BuildCritterDB then
+        self.CritterDB = self:BuildCritterDB()
+        if not self._critterZones then self:BuildCritterZoneIndex() end
+    end
+end
+
+function AddressBook:BuildMobZoneIndex()
+    if not self.BuildMobDB then return end
+    local tempLoad = not self.MobDB
+    if tempLoad then self.MobDB = self:BuildMobDB() end
+    self._mobZones = {}
+    for zoneName in pairs(self.MobDB) do
+        self._mobZones[#self._mobZones + 1] = zoneName
+    end
+    table.sort(self._mobZones)
+    if tempLoad then self.MobDB = nil; collectgarbage("collect") end
+end
+
+function AddressBook:BuildCritterZoneIndex()
+    if not self.BuildCritterDB then return end
+    local tempLoad = not self.CritterDB
+    if tempLoad then self.CritterDB = self:BuildCritterDB() end
+    self._critterZones = {}
+    for zoneName in pairs(self.CritterDB) do
+        self._critterZones[#self._critterZones + 1] = zoneName
+    end
+    table.sort(self._critterZones)
+    if tempLoad then self.CritterDB = nil; collectgarbage("collect") end
+end
+
+function AddressBook:UnloadMobDB()
+    self.MobDB = nil
+    self.CritterDB = nil
+    collectgarbage("collect")
+end
+
+function AddressBook:IsMobDBLoaded()
+    return self.MobDB ~= nil
 end
 
 -- Favorites
@@ -204,6 +375,8 @@ function AddressBook:ToggleUI()
     if self.mainFrame then
         if self.mainFrame:IsShown() then
             self.mainFrame:Hide()
+            -- Unload MobDB to free memory when window is closed
+            self:UnloadMobDB()
         else
             self.mainFrame:Show()
         end
@@ -341,6 +514,14 @@ eventFrame:SetScript("OnEvent", function(self, event)
         -- Build continent/zone hierarchy
         if AddressBook.BuildContinentZoneMap then
             AddressBook:BuildContinentZoneMap()
+        end
+
+        -- Build lightweight zone indexes (doesn't keep MobDB/CritterDB in memory)
+        if AddressBook.BuildMobZoneIndex then
+            AddressBook:BuildMobZoneIndex()
+        end
+        if AddressBook.BuildCritterZoneIndex then
+            AddressBook:BuildCritterZoneIndex()
         end
 
         -- Register slash commands
