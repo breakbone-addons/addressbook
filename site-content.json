@@ -1,41 +1,41 @@
 {
   "id": "addressbook",
   "name": "AddressBook",
-  "tagline": "NPC & location finder for TBC Anniversary with TomTom integration",
-  "description": "Find any NPC in Azeroth and Outland. Browse 4,300+ quest givers, trainers, flight masters, innkeepers, and vendors organized by category, or search by name and zone. Set TomTom waypoints with a single click and record your own custom locations.",
+  "tagline": "NPC, creature & location finder for TBC Anniversary with TomTom integration",
+  "description": "Find any NPC or creature in Azeroth and Outland. Browse 13,600+ locations with 83,000+ spawn points across 110 zones. Quest givers, trainers, vendors, creatures, critters, instance mobs, and more. Set TomTom waypoints with a single click, view all spawn points on the map, and record your own custom locations.",
   "logo": "art/logo-transparent.svg",
   "reverse": true,
   "features": [
     {
-      "title": "4,300+ Locations",
-      "description": "Pre-populated database of quest givers, trainers, flight masters, innkeepers, vendors, and more."
+      "title": "13,600+ Locations",
+      "description": "Quest givers, trainers, vendors, flight masters, innkeepers, 7,500+ creatures, 425 critters, instance entrances, and more."
+    },
+    {
+      "title": "Creature Spawn Maps",
+      "description": "Every creature stores all known spawn points. Right-click to Set All Waypoints and light up the map."
     },
     {
       "title": "Category Browser",
-      "description": "Organized tree of NPC types with continent and zone filtering. Auto-detects your current zone."
-    },
-    {
-      "title": "Search",
-      "description": "Search across all categories by NPC name, zone, or description."
+      "description": "Organized tree with sortable columns, continent/zone filtering, and auto-detect for your current zone."
     },
     {
       "title": "TomTom Integration",
-      "description": "One-click waypoint navigation to any NPC location with TomTom support."
+      "description": "One-click waypoint navigation. Instance creatures auto-redirect to dungeon entrances from the open world."
     },
     {
-      "title": "Custom Entries",
-      "description": "Record your own locations with /ab record and manage favorites."
+      "title": "Addon API",
+      "description": "Other addons can look up NPCs and set waypoints programmatically via AddressBook.API."
     },
     {
-      "title": "Faction-Aware",
-      "description": "Filters results to show only NPCs available to your faction."
+      "title": "Favorites & Custom Entries",
+      "description": "Bookmark locations, save custom entries, and access favorites from the minimap button."
     }
   ],
   "screenshots": [
     {
       "file": "screenshots/main.png",
       "alt": "AddressBook main window showing NPC categories and search",
-      "caption": "Browse and search 4,300+ NPCs across Azeroth and Outland"
+      "caption": "Browse and search 13,600+ NPCs and creatures across Azeroth and Outland"
     }
   ],
   "links": [
