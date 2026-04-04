@@ -4,6 +4,18 @@ AddressBook.VERSION = "1.0.0"
 AddressBook.ADDON_NAME = "AddressBook"
 AddressBook.activeWaypoint = nil
 
+-- Server's current TBC content-release phase.
+-- Entries tagged with a phase > CURRENT_PHASE are hidden from browse/search.
+-- Entries without a phase field always pass through.
+-- Phase schema: 0=PreRaid/Classic, 1=TBC Launch, 2=SSC/TK, 3=Hyjal/BT, 4=ZA, 5=Sunwell
+AddressBook.CURRENT_PHASE = 1
+
+-- Return true if an entry should be visible on the current server phase.
+function AddressBook:IsEntryInPhase(entry)
+    if not entry or not entry.phase then return true end
+    return entry.phase <= self.CURRENT_PHASE
+end
+
 -- Fixed-size fonts so UI layout doesn't break with user font scaling
 local FONT_FILE = "Fonts\\FRIZQT__.TTF"
 
@@ -50,9 +62,10 @@ function AddressBook:Search(query)
         for category, subcats in pairs(db) do
             for subcategory, entries in pairs(subcats) do
                 for i, entry in ipairs(entries) do
-                    if nameMatches(entry.name)
+                    if (nameMatches(entry.name)
                         or (entry.note and strlower(entry.note):find(query, 1, true))
-                        or (entry.zone and strlower(entry.zone):find(query, 1, true)) then
+                        or (entry.zone and strlower(entry.zone):find(query, 1, true)))
+                        and self:IsEntryInPhase(entry) then
                         results[#results + 1] = {
                             entry = entry,
                             category = category,
@@ -79,9 +92,10 @@ function AddressBook:Search(query)
     if self.MobDB then
         for zoneName, entries in pairs(self.MobDB) do
             for i, entry in ipairs(entries) do
-                if nameMatches(entry.name)
+                if (nameMatches(entry.name)
                     or (entry.note and strlower(entry.note):find(query, 1, true))
-                    or strlower(zoneName):find(query, 1, true) then
+                    or strlower(zoneName):find(query, 1, true))
+                    and self:IsEntryInPhase(entry) then
                     local primaryEntry = {
                         name = entry.name,
                         zone = zoneName,
@@ -89,6 +103,7 @@ function AddressBook:Search(query)
                         y = entry.spawns[1][2],
                         note = entry.note,
                         spawns = entry.spawns,
+                        phase = entry.phase,
                     }
                     results[#results + 1] = {
                         entry = primaryEntry,
@@ -107,9 +122,10 @@ function AddressBook:Search(query)
     if self.CritterDB then
         for zoneName, entries in pairs(self.CritterDB) do
             for i, entry in ipairs(entries) do
-                if nameMatches(entry.name)
+                if (nameMatches(entry.name)
                     or (entry.note and strlower(entry.note):find(query, 1, true))
-                    or strlower(zoneName):find(query, 1, true) then
+                    or strlower(zoneName):find(query, 1, true))
+                    and self:IsEntryInPhase(entry) then
                     local primaryEntry = {
                         name = entry.name,
                         zone = zoneName,
@@ -117,6 +133,7 @@ function AddressBook:Search(query)
                         y = entry.spawns[1][2],
                         note = entry.note,
                         spawns = entry.spawns,
+                        phase = entry.phase,
                     }
                     results[#results + 1] = {
                         entry = primaryEntry,
@@ -151,23 +168,26 @@ function AddressBook:GetEntries(category, subcategory)
         local entries = mobSource[subcategory]
         if entries then
             for i, entry in ipairs(entries) do
-                -- MobDB entries have spawns array; use first spawn as primary x,y
-                local primaryEntry = {
-                    name = entry.name,
-                    zone = subcategory,
-                    x = entry.spawns[1][1],
-                    y = entry.spawns[1][2],
-                    note = entry.note,
-                    spawns = entry.spawns,
-                }
-                results[#results + 1] = {
-                    entry = primaryEntry,
-                    category = category,
-                    subcategory = subcategory,
-                    index = i,
-                    isCustom = false,
-                    spawnCount = #entry.spawns,
-                }
+                if self:IsEntryInPhase(entry) then
+                    -- MobDB entries have spawns array; use first spawn as primary x,y
+                    local primaryEntry = {
+                        name = entry.name,
+                        zone = subcategory,
+                        x = entry.spawns[1][1],
+                        y = entry.spawns[1][2],
+                        note = entry.note,
+                        spawns = entry.spawns,
+                        phase = entry.phase,
+                    }
+                    results[#results + 1] = {
+                        entry = primaryEntry,
+                        category = category,
+                        subcategory = subcategory,
+                        index = i,
+                        isCustom = false,
+                        spawnCount = #entry.spawns,
+                    }
+                end
             end
         end
         return results
@@ -179,7 +199,8 @@ function AddressBook:GetEntries(category, subcategory)
         local entries = subcats[subcategory]
         if not entries then return end
         for i, entry in ipairs(entries) do
-            if not factionFilter or not entry.faction or entry.faction == playerFaction then
+            if (not factionFilter or not entry.faction or entry.faction == playerFaction)
+                and self:IsEntryInPhase(entry) then
                 results[#results + 1] = {
                     entry = entry,
                     category = category,
