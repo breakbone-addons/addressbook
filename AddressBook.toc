@@ -5,6 +5,7 @@
 ## Version: 1.4.0
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1494941
+## X-WoWI-ID: 27110
 ## OptionalDeps: TomTom
 ## SavedVariables: AddressBookDB
 ## SavedVariablesPerCharacter: AddressBookCharDB
