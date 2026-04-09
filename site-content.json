@@ -46,6 +46,10 @@
     {
       "label": "CurseForge",
       "href": "https://www.curseforge.com/wow/addons/addressbook"
+    },
+    {
+      "label": "WoWInterface",
+      "href": "https://www.wowinterface.com/downloads/info27110-AddressBook.html"
     }
   ]
 }
