@@ -1,7 +1,7 @@
 {
   "id": "addressbook",
-  "version": "1.4.0",
-  "lastUpdated": "2026-04-10",
+  "version": "1.4.1",
+  "lastUpdated": "2026-04-11",
   "name": "AddressBook",
   "tagline": "NPC, creature & location finder for TBC Anniversary with TomTom integration",
   "description": "Find any NPC or creature in Azeroth and Outland. Browse 13,600+ locations with 83,000+ spawn points across 110 zones. Quest givers, trainers, vendors, creatures, critters, instance mobs, and more. Set TomTom waypoints with a single click, view all spawn points on the map, and record your own custom locations.",

@@ -1,5 +1,13 @@
 # AddressBook Changelog
 
+## v1.4.1
+
+- Release package shrunk by ~820 KB: no longer ships developer-only files (`art/`, `screenshots/`, `tests/`, `CURSEFORGE.md`, `site-content.json`, `scripts/`)
+- Minimap icon file size reduced from 16 KB to 5 KB via lossless RLE compression (visually identical)
+- Vendored libraries directory renamed from `Libs/` to `libs/` (lowercase, matches the rest of the Breakbone addon family)
+- `LICENSE` file now included in the release zip
+- Changelog version headers now consistently use the `v` prefix
+
 ## v1.4.0
 - Added 7,500+ creatures and 425 critters with all spawn points across 110 zones (outdoor + instances)
 - Added public API for other addons: Lookup, WaypointTo, ShowSpawns, Search

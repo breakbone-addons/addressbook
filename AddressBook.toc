@@ -2,7 +2,7 @@
 ## Title: AddressBook
 ## Notes: Location and NPC address book with TomTom waypoint integration.
 ## Author: Breakbone - Dreamscythe
-## Version: 1.4.0
+## Version: 1.4.1
 ## X-License: All Rights Reserved
 ## X-Curse-Project-ID: 1494941
 ## X-WoWI-ID: 27110
