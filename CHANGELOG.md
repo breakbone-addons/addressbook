@@ -1,6 +1,6 @@
 # AddressBook Changelog
 
-## 1.4.0
+## v1.4.0
 - Added 7,500+ creatures and 425 critters with all spawn points across 110 zones (outdoor + instances)
 - Added public API for other addons: Lookup, WaypointTo, ShowSpawns, Search
 - Added sortable column headers (click Name, Zone, or Note to sort)
@@ -15,7 +15,7 @@
 - Total database: 13,600+ locations with 83,000+ spawn points
 - Test suite expanded to 61 tests
 
-## 1.3.0
+## v1.3.0
 - Added 1,360 vendor NPCs across 13 subcategories (food, reagents, profession supplies, weapons, armor, and more)
 - Added 50-test suite covering data validation, favorites, custom entries, map resolution, and TomTom integration
 - Fixed font scaling: UI layout is now stable regardless of user font size settings
@@ -23,7 +23,7 @@
 - Zone dropdown now filters by selected continent
 - Total database: 5,800+ locations
 
-## 1.2.0
+## v1.2.0
 - Added dungeon and raid instance entrances (42 dungeons, 15 raids covering Classic and TBC)
 - Added Nearest button to highlight the closest location in the current list
 - Added right-click minimap button menu showing favorites for quick waypoint access
@@ -31,7 +31,7 @@
 - Zone dropdown now only shows zones that have entries in the database
 - Character limits on custom entry fields (30 name, 60 note)
 
-## 1.1.0
+## v1.1.0
 - Added favorites: right-click any entry to mark as favorite, shown in green with a dedicated Favorites category
 - Added full Add Entry dialog with name, coordinates, zone, and note fields
 - Added "Current Location" button to auto-fill position in the Add Entry dialog
@@ -40,7 +40,7 @@
 - Fixed TomTom waypoint integration for BCC Anniversary Edition mapIDs
 - Removed redundant Save Here button (Add Entry now handles all entry creation)
 
-## 1.0.0
+## v1.0.0
 - Initial release
 - Browse 1,600+ NPC locations: trainers, flight masters, innkeepers, vendors, banks, auction houses, battlemasters, and more
 - TomTom waypoint integration with one-click navigation
