@@ -52,7 +52,7 @@ jobs:
       contents: write
     env:
       ADDON_NAME: AddressBook
-      BUDGET_KB: 3200
+      BUDGET_KB: 1024
       RELEASE_ZIP_SUFFIX: bcc
       PUBLISH: ${{ github.event_name == 'push' || github.event.inputs.publish == 'true' }}
     steps:
