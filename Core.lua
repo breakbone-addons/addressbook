@@ -8,7 +8,7 @@ AddressBook.activeWaypoint = nil
 -- Entries tagged with a phase > CURRENT_PHASE are hidden from browse/search.
 -- Entries without a phase field always pass through.
 -- Phase schema: 0=PreRaid/Classic, 1=TBC Launch, 2=SSC/TK, 3=Hyjal/BT, 4=ZA, 5=Sunwell
-AddressBook.CURRENT_PHASE = 1
+AddressBook.CURRENT_PHASE = 2
 
 -- Return true if an entry should be visible on the current server phase.
 function AddressBook:IsEntryInPhase(entry)

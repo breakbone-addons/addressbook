@@ -1,5 +1,9 @@
 # AddressBook Changelog
 
+## v1.4.2
+
+- Phase 2 content unlocked: Serpentshrine Cavern and Tempest Keep creatures now appear in browse and search.
+
 ## v1.4.1
 
 - Release package shrunk by ~820 KB: no longer ships developer-only files (`art/`, `screenshots/`, `tests/`, `CURSEFORGE.md`, `site-content.json`, `scripts/`)
