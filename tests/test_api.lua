@@ -77,20 +77,27 @@ function T.test_lookup_action_all_with_spawns()
         called = true
     end
 
-    -- Search for a creature with multiple spawns, using zone to ensure definitive match
+    -- Pick a mob whose name is unique across the whole DB so the match is
+    -- guaranteed definitive. Choose the alphabetically first candidate —
+    -- pairs() iteration order varies between Lua versions, so taking the
+    -- first mob encountered makes the test order-dependent.
     AddressBook:LoadMobDB()
     local testMob, testZone = nil, nil
     if AddressBook.MobDB then
+        local nameCounts = {}
+        for _, entries in pairs(AddressBook.MobDB) do
+            for _, e in ipairs(entries) do
+                nameCounts[e.name] = (nameCounts[e.name] or 0) + 1
+            end
+        end
         for zone, entries in pairs(AddressBook.MobDB) do
             for _, e in ipairs(entries) do
-                -- Find a mob with a unique-ish name and multiple spawns
-                if #e.spawns > 5 and #e.name > 12 then
+                if nameCounts[e.name] == 1 and #e.spawns > 5
+                    and (not testMob or e.name < testMob) then
                     testMob = e.name
                     testZone = zone
-                    break
                 end
             end
-            if testMob then break end
         end
     end
 
